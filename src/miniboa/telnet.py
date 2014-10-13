@@ -274,7 +274,7 @@ class TelnetClient(object):
         """
         if len(self.send_buffer):
             try:
-                sent = self.sock.send(self.send_buffer)
+                sent = self.sock.send(self.send_buffer.encode('UTF-8'))
             except socket.error as err:
                 print("!! SEND error '{}:{}' from {}".format(err[0], err[1], self.addrport()))
                 self.active = False
@@ -605,7 +605,7 @@ class TelnetClient(object):
                     self._note_reply_pending(TTYPE, False)
                     self._note_remote_option(TTYPE, True)
                     ## Tell them to send their terminal type
-                    self.send('%c%c%c%c%c%c' % (IAC, SB, TTYPE, SEND, IAC, SE))
+                    self.send('{}{}{}{}{}{}'.format(IAC, SB, TTYPE, SEND, IAC, SE))
 
                 elif (self._check_remote_option(TTYPE) is False or
                         self._check_remote_option(TTYPE) is UNKNOWN):

@@ -1,18 +1,36 @@
-#!/usr/bin/python           # This is server.py file
+from miniboa import *
 
-import socket               # Import socket module
+#define Hanabi connect and disconnect behavior
+#required by miniboa
 
-s = socket.socket()         # Create a socket object
-#host = socket.gethostname() # Get local machine name
-host = "127.0.0.1"
-port = 64651                # Reserve a port for your service.
-s.bind((host, port))        # Bind to the port
+def _on_connect(client):
+    """
+    Placeholder new connection handler.
+    """
+    print("++ Opened connection to {}, sending greeting...".format(client.addrport()))
+    client.send("HANABISERVER")
 
-s.listen(5)                 # Now wait for client connection.
-while True:
-   c, addr = s.accept()     # Establish connection with client.
-   print("Got connection from {}".format(addr))
-   hanabiconfirm = "HANABISERVER".encode("UTF-8")
-   c.send(hanabiconfirm)
-   c.close()                # Close the connection
-   break
+def _on_disconnect(client):
+    """
+    Placeholder lost connection handler.
+    """
+    print("-- Lost connection to {}".format(client.addrport()))
+	
+#define Hanabi server
+	
+class HanabiServer(TelnetServer):
+	def tst_confirm():
+		print("This is a Hanabi server")
+
+if __name__ == '__main__':
+	SERVER_RUN = True
+			
+	srv = HanabiServer(7777,'',_on_connect,_on_disconnect,0.01)
+
+	print(">> Listening for connections on port {}.  CTRL-C to break.".format(srv.port))
+
+	## Server Loop
+	while SERVER_RUN:
+		srv.poll()        ## Send, Recv, and look for new connections
+
+	print(">> Server shutdown.")

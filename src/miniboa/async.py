@@ -123,15 +123,15 @@ class TelnetServer(object):
         ## Build a list of connections to test for receive data pending
         recv_list = [self.server_fileno]    # always add the server
 
-        for client in self.clients.values():
-            if client.active:
-                recv_list.append(client.fileno)
+        for clientkey in list(self.clients):
+            if self.clients[clientkey].active:
+                recv_list.append(self.clients[clientkey].fileno)
             ## Delete inactive connections from the dictionary
             else:
                 #print "-- Lost connection to %s" % client.addrport()
                 #client.sock.close()
-                self.on_disconnect(client)
-                del self.clients[client.fileno]
+                self.on_disconnect(self.clients[clientkey])
+                del self.clients[clientkey]
 
 
         ## Build a list of connections that need to send data
@@ -150,7 +150,7 @@ class TelnetServer(object):
             print("!! FATAL SELECT error '{}:{}'!".format(err[0], err[1]), file=sys.stderr)
             sys.exit(1)
 
-        ## Process socket file descriptors with data to recieve
+        ## Process socket file descriptors with data to receive
         for sock_fileno in rlist:
 
             ## If it's coming from the server's socket then this is a new

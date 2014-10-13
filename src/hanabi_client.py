@@ -9,7 +9,7 @@ s = socket.socket()
 
 valid_connect = False
 quit_client = False
-HANABI_PORT = 64651
+HANABI_PORT = 7777
 BUFFER_SIZE = 1024
 		
 def print_header():
@@ -43,7 +43,7 @@ while (not valid_connect):
 	s.connect((tryhost, HANABI_PORT)) #find out what exceptions this throws
 	hostcheck = s.recv(BUFFER_SIZE).decode(encoding='UTF-8')
 	if (hostcheck != "HANABISERVER"):
-		print("Connected to a non-Hanabi server (server sent {})\n".format(hostcheck))
+		print("Connected to a non-Hanabi server (server sent '{}')\n".format(hostcheck))
 		time.sleep(3)
 		s.close
 		continue
