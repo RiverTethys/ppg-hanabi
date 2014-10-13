@@ -15,12 +15,6 @@ def play_hanabi():
 	player_list = [player1,player2]
 	
 	game.initial_player_order(player_list)
-	
-	# for testing...
-	i=0
-	for card in game.decks["game_deck"].deck:
-		print("{}. {}".format(i,card))
-		i += 1
 
 	for i in range(game.variant.handsize):
 		for dude in game.players:
