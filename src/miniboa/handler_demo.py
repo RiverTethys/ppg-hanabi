@@ -26,11 +26,11 @@ def my_on_connect(client):
     """
     Example on_connect handler.
     """
-    client.send('You connected from %s\n' % client.addrport())
+    client.send('You connected from {}\n'.format(client.addrport()))
     if CLIENTS:
         client.send('Also connected are:\n')
         for neighbor in CLIENTS:
-            client.send('%s\n' % neighbor.addrport())
+            client.send('{}\n'.format(neighbor.addrport()))
     else:
         client.send('Sadly, you are alone.\n')
     CLIENTS.append(client)
@@ -47,6 +47,6 @@ server = TelnetServer()
 server.on_connect=my_on_connect
 server.on_disconnect=my_on_disconnect
 
-print "\n\nStarting server on port %d.  CTRL-C to interrupt.\n" % server.port
+print("\n\nStarting server on port {}.  CTRL-C to interrupt.\n".format(server.port))
 while True:
     server.poll()

@@ -37,7 +37,7 @@ def _on_connect(client):
     """
     Placeholder new connection handler.
     """
-    print "++ Opened connection to %s, sending greeting..." % client.addrport()
+    print("++ Opened connection to {}, sending greeting...".format(client.addrport()))
     client.send("Greetings from Miniboa! "
         " Now it's time to add your code.\n")
 
@@ -45,7 +45,7 @@ def _on_disconnect(client):
     """
     Placeholder lost connection handler.
     """
-    print "-- Lost connection to %s" % client.addrport()
+    print("-- Lost connection to {}".format(client.addrport()))
 
 
 #-----------------------------------------------------------------Telnet Server
@@ -88,8 +88,8 @@ class TelnetServer(object):
         try:
             server_socket.bind((address, port))
             server_socket.listen(5)
-        except socket.error, err:
-            print >> sys.stderr, "Unable to create the server socket:", err
+        except socket.error as err:
+            print("Unable to create the server socket: {}".format(err), file=sys.stderr)
             sys.exit(1)
 
         self.server_socket = server_socket
@@ -145,10 +145,9 @@ class TelnetServer(object):
             rlist, slist, elist = select.select(recv_list, send_list, [],
                 self.timeout)
 
-        except select.error, err:
+        except select.error as err:
             ## If we can't even use select(), game over man, game over
-            print >> sys.stderr, ("!! FATAL SELECT error '%d:%s'!"
-                % (err[0], err[1]))
+            print("!! FATAL SELECT error '{}:{}'!".format(err[0], err[1]), file=sys.stderr)
             sys.exit(1)
 
         ## Process socket file descriptors with data to recieve
@@ -161,14 +160,13 @@ class TelnetServer(object):
                 try:
                     sock, addr_tup = self.server_socket.accept()
 
-                except socket.error, err:
-                    print >> sys.stderr, ("!! ACCEPT error '%d:%s'." %
-                        (err[0], err[1]))
+                except socket.error as err:
+                    print("!! ACCEPT error '{}:{}'.".format(err[0], err[1]), file=sys.stderr)
                     continue
 
                 ## Check for maximum connections
                 if self.client_count() >= MAX_CONNECTIONS:
-                    print '?? Refusing new connection; maximum in use.'
+                    print('?? Refusing new connection; maximum in use.')
                     sock.close()
                     continue
 

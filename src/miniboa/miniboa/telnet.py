@@ -82,18 +82,18 @@ WONT    = chr(252)      # Wont; deny option request
 DO      = chr(253)      # Do = Request or confirm remote option
 DONT    = chr(254)      # Don't = Demand or confirm option halt
 IAC     = chr(255)      # Interpret as Command
-SEND    = chr(001)      # Sub-process negotiation SEND command
-IS      = chr(000)      # Sub-process negotiation IS command
+SEND    = chr(1)      # Sub-process negotiation SEND command
+IS      = chr(0)      # Sub-process negotiation IS command
 
 #--[ Telnet Options ]----------------------------------------------------------
 
-BINARY  = chr(  0)      # Transmit Binary
-ECHO    = chr(  1)      # Echo characters back to sender
-RECON   = chr(  2)      # Reconnection
-SGA     = chr(  3)      # Suppress Go-Ahead
-TTYPE   = chr( 24)      # Terminal Type
-NAWS    = chr( 31)      # Negotiate About Window Size
-LINEMO  = chr( 34)      # Line Mode
+BINARY  = chr(0)      # Transmit Binary
+ECHO    = chr(1)      # Echo characters back to sender
+RECON   = chr(2)      # Reconnection
+SGA     = chr(3)      # Suppress Go-Ahead
+TTYPE   = chr(24)      # Terminal Type
+NAWS    = chr(31)      # Negotiate About Window Size
+LINEMO  = chr(34)      # Line Mode
 
 
 #-----------------------------------------------------------------Telnet Option
@@ -200,7 +200,7 @@ class TelnetClient(object):
         """
         Return the DE's IP address and port number as a string.
         """
-        return "%s:%s" % (self.address, self.port)
+        return "{}:{}".format(self.address, self.port)
 
     def idle(self):
         """
@@ -275,9 +275,8 @@ class TelnetClient(object):
         if len(self.send_buffer):
             try:
                 sent = self.sock.send(self.send_buffer)
-            except socket.error, err:
-                print("!! SEND error '%d:%s' from %s" % (err[0], err[1],
-                    self.addrport()))
+            except socket.error as err:
+                print("!! SEND error '{}:{}' from {}".format(err[0], err[1], self.addrport()))
                 self.active = False
                 return
             self.bytes_sent += sent
@@ -291,9 +290,8 @@ class TelnetClient(object):
         """
         try:
             data = self.sock.recv(2048)
-        except socket.error, ex:
-            print ("?? socket.recv() error '%d:%s' from %s" %
-                (ex[0], ex[1], self.addrport()))
+        except socket.error as ex:
+            print("?? socket.recv() error '{}:{}' from {}".format(ex[0], ex[1], self.addrport()))
             raise BogConnectionLost()
 
         ## Did they close the connection?
@@ -453,7 +451,7 @@ class TelnetClient(object):
             pass
 
         else:
-            print "2BC: Should not be here."
+            print("2BC: Should not be here.")
 
         self.telnet_got_iac = False
         self.telnet_got_cmd = None
@@ -647,7 +645,7 @@ class TelnetClient(object):
                     self._iac_dont(TTYPE)
 
         else:
-            print "3BC: Should not be here."
+            print("3BC: Should not be here.")
 
         self.telnet_got_iac = False
         self.telnet_got_cmd = None
@@ -666,7 +664,7 @@ class TelnetClient(object):
 
             if bloc[0] == NAWS:
                 if len(bloc) != 5:
-                    print "Bad length on NAWS SB:", len(bloc)
+                    print("Bad length on NAWS SB: {}".format(len(bloc)))
                 else:
                     self.columns = (256 * ord(bloc[1])) + ord(bloc[2])
                     self.rows = (256 * ord(bloc[3])) + ord(bloc[4])
@@ -722,16 +720,16 @@ class TelnetClient(object):
 
     def _iac_do(self, option):
         """Send a Telnet IAC "DO" sequence."""
-        self.send('%c%c%c' % (IAC, DO, option))
+        self.send("{}{}{}".format(IAC, DO, option))
 
     def _iac_dont(self, option):
         """Send a Telnet IAC "DONT" sequence."""
-        self.send('%c%c%c' % (IAC, DONT, option))
+        self.send("{}{}{}".format(IAC, DONT, option))
 
     def _iac_will(self, option):
         """Send a Telnet IAC "WILL" sequence."""
-        self.send('%c%c%c' % (IAC, WILL, option))
+        self.send("{}{}{}".format(IAC, WILL, option))
 
     def _iac_wont(self, option):
         """Send a Telnet IAC "WONT" sequence."""
-        self.send('%c%c%c' % (IAC, WONT, option))
+        self.send("{}{}{}".format(IAC, WONT, option))

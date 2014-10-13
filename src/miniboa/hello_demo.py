@@ -22,6 +22,6 @@ placeholder 'on_connect()' function.  Does nothing else.
 from miniboa import TelnetServer
 
 server = TelnetServer()
-print "\n\nStarting server on port %d.  CTRL-C to interrupt.\n" % server.port
+print("\n\nStarting server on port {}.  CTRL-C to interrupt.\n".format(server.port))
 while True:
     server.poll()

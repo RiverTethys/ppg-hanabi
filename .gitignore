@@ -218,3 +218,10 @@ pip-log.txt
 
 #Mr Developer
 .mr.developer.cfg
+src/miniboa/miniboa/.svn/entries
+src/miniboa/miniboa/.svn/all-wcprops
+*.svn-base
+src/clienttest.py
+src/servertest.py
+src/Hanabi_Progress_a.py
+src/Hanabi_Progress_AI_Section.py

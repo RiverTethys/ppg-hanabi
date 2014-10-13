@@ -28,10 +28,10 @@ def on_connect(client):
     Sample on_connect function.
     Handles new connections.
     """
-    print "++ Opened connection to %s" % client.addrport()
-    broadcast('%s joins the conversation.\n' % client.addrport() )
+    print("++ Opened connection to {}".format(client.addrport()))
+    broadcast('{} joins the conversation.\n'.format(client.addrport() ))
     CLIENT_LIST.append(client)
-    client.send("Welcome to the Chat Server, %s.\n" % client.addrport() )
+    client.send("Welcome to the Chat Server, {}.\n".format(client.addrport() ))
 
 
 def on_disconnect(client):
@@ -39,9 +39,9 @@ def on_disconnect(client):
     Sample on_disconnect function.
     Handles lost connections.
     """
-    print "-- Lost connection to %s" % client.addrport()
+    print("-- Lost connection to {}".format(client.addrport()))
     CLIENT_LIST.remove(client)
-    broadcast('%s leaves the conversation.\n' % client.addrport() )
+    broadcast('{} leaves the conversation.\n'.format(client.addrport() ))
 
 
 def kick_idle():
@@ -51,7 +51,7 @@ def kick_idle():
     ## Who hasn't been typing?
     for client in CLIENT_LIST:
         if client.idle() > IDLE_TIMEOUT:
-            print('-- Kicking idle lobby client from %s' % client.addrport())
+            print("-- Kicking idle lobby client from {}".format(client.addrport()))
             client.active = False
 
 
@@ -80,13 +80,13 @@ def chat(client):
     """
     global SERVER_RUN
     msg = client.get_command()
-    print '%s says, "%s"' % (client.addrport(), msg)
+    print('{} says, "{}"'.format(client.addrport(), msg))
 
     for guest in CLIENT_LIST:
         if guest != client:
-            guest.send('%s says, %s\n' % (client.addrport(), msg))
+            guest.send('{} says, {}\n'.format(client.addrport(), msg))
         else:
-            guest.send('You say, %s\n' % msg)
+            guest.send('You say, {}\n'.format(msg))
 
     cmd = msg.lower()
     ## bye = disconnect
@@ -118,8 +118,7 @@ if __name__ == '__main__':
         timeout = .05
         )
 
-    print(">> Listening for connections on port %d.  CTRL-C to break."
-        % telnet_server.port)
+    print(">> Listening for connections on port {}.  CTRL-C to break.".format(telnet_server.port))
 
     ## Server Loop
     while SERVER_RUN:
