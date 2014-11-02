@@ -971,7 +971,7 @@ class BitTable(object):
 	
 	def new_position(self,card,player_name,game):	
 		self.list[card].clear(cquality = "position")
-		position = game.decks[player_name].deck.index(card)
+		position = game.variant.handsize - game.decks[player_name].deck.index(card)
 		Posbit = Hanabit("confirmed","position",position,"final",self)
 		self.add_bit(Posbit,card)
 		
