@@ -79,9 +79,8 @@ class DeductionBot(object):
 				if card not in table.play_q:
 					table.play_q.appendleft(card)
 				if card in table.play_q:
-					for i in range(len(table.play_q)):
-						if table.play_q[i]==card:
-							table.play_q.appendleft(table.play_q.pop(i))
+					table.play_q.remove(card)
+					table.play_q.appendleft(card)
 		else:
 			if table.bool_query(qcard= card,qtype ="confirmed",qvalue = "playable",qspin="pos"):
 				Pbit = Hanabit("confirmed","playability","playable","pos",table)
