@@ -224,5 +224,4 @@ src/miniboa/miniboa/.svn/all-wcprops
 *.svn-base
 src/clienttest.py
 src/servertest.py
-src/Hanabi_Progress_a.py
 src/Hanabi_Progress_AI_Section.py

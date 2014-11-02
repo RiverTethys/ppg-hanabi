@@ -56,7 +56,6 @@ class Deck(object):
 			print(r)
 		
 	def build_deck(self):
-		self.print_distr()
 		deck = []
 		card_id = 0	
 		for color in self.distr:
@@ -226,9 +225,9 @@ class HanabiGame(object):
 		self.card_list = {}
 		self.initial_game_deck = {}
 		self.decks = {}
+		self.depth = depth
 		self.set_game_deck()
 		self.set_stacks()
-		self.depth = depth
 		self.initial_player_order(player_name_list)
 		self.update_all_tables()
 		self.initial_hands()
@@ -240,13 +239,13 @@ class HanabiGame(object):
 	def set_game_deck(self):
 		self.add_card_list(HanabiGameDeck("card_list",self.variant, self.variant.decktemplate))
 		game_deck = HanabiGameDeck("game_deck",self.variant,self.variant.decktemplate)
+		if self.depth == 0:
+			game_deck.print_distr()
 		game_deck.shuffle()
 		initial_game_deck = deepcopy(game_deck)
 		self.add_initial_game_deck(initial_game_deck)
 		self.add_deck(game_deck)
 
-	
-	
 	def set_stacks(self):
 		self.add_deck(HanabiStacks("Play",self.variant,self.variant.stackstemplate))
 		self.add_deck(HanabiStacks("Discard",self.variant,self.variant.stackstemplate))
@@ -293,7 +292,6 @@ class HanabiGame(object):
 		return self.decks[deckname].draw()
 		#table update occurs in Player
 		
-	
 	def play_card(self,card,player):
 		if self.bot.playable(card,self):
 			for handcard in self.decks[player.name].deck:
@@ -336,11 +334,6 @@ class HanabiGame(object):
 		# self.add_bit(color_bit,card)
 		# self.add_bit(number_bit,card)
 		# self.new_location(card,location)
-	
-	
-	
-
-	
 
 	def action(self,ev):
 		#Figure out whodunit...
@@ -386,14 +379,11 @@ class HanabiGame(object):
 		#Append the event to my own event log.
 		self.past_log.append(ev)
 	
-	
-
-	
 	def add_player(self,dude):
 		self.players.append(dude)
 	
 	def initial_player_order(self,player_name_list):
-		npc_names = ["Playtpus Bob", "Echidna Jane","Wallaby Jim"]
+		npc_names = ["Platypus Bob", "Echidna Jane","Wallaby Jim"]
 		npc_name_list = []
 		if self.variant.playernum < len(player_name_list) +len(npc_name_list):
 			print("Too many players for this variant.")
@@ -423,6 +413,7 @@ class HanabiGame(object):
 		self.bot.set_players(self.players_initial)
 		for dude in self.players:
 			dude.initialize_trike(self)
+			self.decks[dude.name].print_distr()
 	
 	def initial_hands(self):
 		for i in range(self.variant.handsize):

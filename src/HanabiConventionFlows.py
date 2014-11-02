@@ -2,8 +2,6 @@
 
 ### We need to work on solidifying our list of qualities and values
 
-from HanabiClasses_b import *
-
 class HanabiConventions(object):
 	def __init__(self,game):
 		self.bot = game.bot
@@ -39,7 +37,7 @@ class ClueConventions(HanabiConventions):
 	def possible(self,table):
 		event_list = []
 		for p in self.players:
-			if p.name != table.name
+			if p.name != table.name:
 				for color in self.bot.decktemplate.colors:
 					event_list.append(HanabiEvent(table.name,p.name,"Clue",None,None,color))
 				for number in self.bot.decktemplate.colors:

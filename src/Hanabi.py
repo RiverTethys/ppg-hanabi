@@ -1,6 +1,10 @@
 #####    RECENT CHANGES    #####
 # number of tags suggests importance of the comment 
 
+### A lot of the print statements in HanabiGame now have "if self.depth == 0:"  in front of them to clean up output. May move things around and do this with the deck initializations as well.
+### Okay, I have removed the automatic print_distr from Deck initialization. Now only if self.depth == 0 will the game call the deck's print_distr.
+
+
 ##### NEXT ROUND OF TO DO OPTIONS
 ## q. play conventions and play safety deductions
 ## w. discard conventions and discard safety deductions
@@ -17,9 +21,7 @@
 
 # we should check if it's okay to dump the Sim files
 
-## In progress_a, more calls are looped over all of the games (so that it works right)
 
-### A lot of the print statements in HanabiGame now have "if self.depth == 0:"  in front of them to clean up output. May move things around and do this with the deck initializations as well.
 
 ### progress_a  now has a bool function sims_consistent used to print confirmation that the sims are updating nicely so we only have to print the main game's info.
 ### You might think about whether we need to check any more details for consistency.
@@ -85,9 +87,6 @@ def sims_consistent(games):
 			return False
 	return True
 
-
-
-
 def update_tables(games):
 	for x in games:
 		for p in x.players:
@@ -122,7 +121,6 @@ def print_table_list(games,game_name,player_name,type,quality,value,spin):
 			for p in x.players:
 				if player_name == p.name:
 					print (p.trike.tab.make_short_list(type,quality,value,spin))
-
 
 def turn(games):
 	active_player = games[0].players[0]

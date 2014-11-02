@@ -10,7 +10,7 @@ class DeductionBot(object):
 		self.decktemplate = variant.decktemplate
 		self.players = []
 
-	def set_players(players)
+	def set_players(self,players):
 		self.players = deepcopy(players)
 	
 	def playable(self,card,game):
