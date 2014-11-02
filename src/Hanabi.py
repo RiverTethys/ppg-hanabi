@@ -60,17 +60,9 @@
 #3. Make this happen erry turn (information goes in and all of the proper updates happen in the sim, and all of the updates in the sim) (again, done except maybe the AI parts)
 #3.b. AI turn vs. Person Turn (this probably happens as we work on the rest of A)
 
-
 #need input validation on "which card to play/discard" and "who's going first"
 
-
 #Not 100% sure if Events are going to be used for AI planning, but if they are, we may need some way to track 'intent' (e.g. protective clues, versus playing clues). Right now I'm attempting to use them (that is, the list of possible actions is actually a list of events)
-
-#right now there's nothing to enforce each card being in only one place at a time.
-#Zone???
-#The relationship between Variant and Game need to be worked out 
-
-
 
 from HanabiClasses import *
 
