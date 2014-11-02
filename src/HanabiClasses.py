@@ -988,7 +988,7 @@ class BitTable(object):
 					self.new_position(card,p.name,game)
 			if (not in_some_hand):
 				if self.bool_query(qcard = card,qquality = "position", qspin = "final"):
-					self.list[card].clear(qquality = "position")
+					self.list[card].clear(cquality = "position")
 			
 			
 	
