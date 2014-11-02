@@ -73,10 +73,10 @@ class DeductionBot(object):
 			else:
 				Pbit = Hanabit("confirmed","playability","playable","pos",table)
 			table.add_bit(Pbit,card)
+			table.list[card].clear(cquality="discardability")
 			if card in table.location[table.name]:
 				if card in table.discard_q:
 					table.discard_q.remove(card)
-					table.list[card].clear(cquality="discardability")
 				if card not in table.play_q:
 					table.play_q.appendleft(card)
 				if card in table.play_q:
