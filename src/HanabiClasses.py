@@ -686,8 +686,8 @@ class Knowledge(object):
 		
 class BitFolder(object):
 	def __init__(self,game,card):
-		self.qualities = ["color","number","location","playability","discardability"]
-		self.values = {"color":game.colors,"number":game.numbers,"location":game.decks,"playability":["playable","not playable"],"discardability":["discardable","not discardable","trash"]}
+		self.qualities = ["color","number","location","playability","discardability","position"]
+		self.values = {"color":game.colors,"number":game.numbers,"location":game.decks,"playability":["playable","not playable"],"discardability":["discardable","not discardable","trash"],"position":[x+1 for x in range(game.variant.handsize)]}
 		self.folder = {quality:{value:[] for value in self.values[quality]} for quality in self.qualities}
 		self.pile = []
 		self.quality_pile = {quality:[] for quality in self.qualities}
@@ -970,7 +970,7 @@ class BitTable(object):
 		
 	
 	def new_position(self,card,player_name,game):	
-		self.list[card].clear(qquality = "position")
+		self.list[card].clear(cquality = "position")
 		position = game.decks[player_name].deck.index(card)
 		Posbit = Hanabit("confirmed","position",position,"final",self)
 		self.add_bit(Posbit,card)
