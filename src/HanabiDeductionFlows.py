@@ -78,7 +78,7 @@ class DeductionBot(object):
 					table.discard_q.remove(card)
 				if card not in table.play_q:
 					table.play_q.appendleft(card)
-				if card in table.play:
+				if card in table.play_q:
 					table.play_q.appendleft(table.play_q.pop(card.index()))
 		else:
 			if table.bool_query(qcard= card,qtype ="confirmed",qvalue = "playable",qspin="pos"):
