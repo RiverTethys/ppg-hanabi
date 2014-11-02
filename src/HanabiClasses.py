@@ -153,13 +153,14 @@ class HanabiVariant(object):
 		self.rules = rules
 		
 class HanabiEvent(object):
-	def __init__(self,src,tgt,type,id,number,color):
+	def __init__(self,src,tgt,type,id,color,number):
 		self.src = src
 		self.tgt = tgt
 		self.type = type # "Play", "Discard", or "Clue"
 		self.id = id
-		self.number = number
 		self.color = color
+		self.number = number
+
 		
 	def __repr__(self):
 		if (self.src == None):
@@ -178,26 +179,29 @@ class HanabiEvent(object):
 				repstr += "{}{}.".format(self.number,self.color)
 		return repstr
 	
-	def make_clue(self,src,tgt,number,color):
+	def make_clue(self,src,tgt,color,number):
 		self.src = src
 		self.tgt = tgt
 		self.type = "Clue"
-		self.number = number
 		self.color = color
+		self.number = number
+
 		
-	def make_play(self,src,id,number,color):
+	def make_play(self,src,id,color,number):
 		self.src = src
 		self.type = "Play"
 		self.id = id
-		self.number = number
 		self.color = color
+		self.number = number
+
 		
-	def make_discard(self,src,id,number,color):
+	def make_discard(self,src,id,color,number):
 		self.src = src
 		self.type = "Discard"
 		self.id = id
-		self.number = number
 		self.color = color
+		self.number = number
+
 		
 class HanabiGame(object):
 	def __init__(self,name,variant,conventions,deduction_bot,player_name_list,total_depth,depth):
@@ -551,10 +555,10 @@ class Player(object):
 						try:
 							clue_choice = input("\n")
 							if clue_choice.upper() in possible_colors:
-								current_event.make_clue(self.name,tgt.name,None,clue_choice.upper())
+								current_event.make_clue(self.name,tgt.name,clue_choice.upper(),None)
 								break
 							elif int(clue_choice) in possible_numbers:
-								current_event.make_clue(self.name,tgt.name,int(clue_choice),None)
+								current_event.make_clue(self.name,tgt.name,None,int(clue_choice))
 								break
 							else:
 								print("That's not a valid clue choice.\n")
@@ -566,12 +570,12 @@ class Player(object):
 					
 			elif (action=='a' or action=='A'):
 				a = game.decks[self.name].deck[-int(input("Which card? 1=newest,{}=oldest\n".format(game.variant.handsize)))]
-				current_event.make_play(self.name,a.id,a.number,a.color)
+				current_event.make_play(self.name,a.id,a.color,a.number)
 				break
 				
 			elif (action=='d' or action=='D'):
 				d = game.decks[self.name].deck[-int(input("Which card? 1=newest,{}=oldest\n".format(game.variant.handsize)))]
-				current_event.make_discard(self.name,d.id,d.number,d.color)
+				current_event.make_discard(self.name,d.id,d.color,d.number)
 				break
 		return current_event
 		

@@ -16,7 +16,7 @@ class PlayConventions(HanabiConventions):
 		event_list = []
 		for card in table.location[table.name]:
 			if table.bool_query(qcard=card,qquality="playability",qspin="pos") or table.bool_query(qcard=card,qquality="playability",qspin="final"):
-				event_list.append( HanabiEvent(table.name,None,"Play",card.id,card.number,card.color))
+				event_list.append( HanabiEvent(table.name,None,"Play",card.id,card.color,card.number))
 		return event_list
 
 class DiscardConventions(HanabiConventions):
@@ -27,7 +27,7 @@ class DiscardConventions(HanabiConventions):
 		event_list = []
 		for card in table.location[table.name]:
 			if table.bool_query(qcard=card,qquality="discardability",qvalue = "trash", qspin="final") or (table.bool_query(qcard=card,qquality="discardability",qvalue="discardable",qspin="pos") and not table.bool_query(qcard=card,qquality="playability",qvalue="playable",qspin ="pos")):
-				event_list.append( HanabiEvent(table.name,None,"Discard",card.id,card.number,card.color))
+				event_list.append( HanabiEvent(table.name,None,"Discard",card.id,card.color,card.number))
 		return event_list
 		
 class ClueConventions(HanabiConventions):
@@ -39,9 +39,9 @@ class ClueConventions(HanabiConventions):
 		for p in self.players:
 			if p.name != table.name:
 				for color in self.bot.decktemplate.colors:
-					event_list.append(HanabiEvent(table.name,p.name,"Clue",None,None,color))
+					event_list.append(HanabiEvent(table.name,p.name,"Clue",None,color,None))
 				for number in self.bot.decktemplate.colors:
-					event_list.append(HanabiEvent(table.name,p.name,"Clue",None,number,None))
+					event_list.append(HanabiEvent(table.name,p.name,"Clue",None,None,number))
 		return event_list
 				
 				
