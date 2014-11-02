@@ -11,6 +11,9 @@
 #   License for the specific language governing permissions and limitations
 #   under the License.
 #------------------------------------------------------------------------------
+#    NOTICE: this file has been modified from its original version 
+#    in order to work with Python 3.x
+#                         -- RiverTethys
 
 """
 Manage one Telnet client connected via a TCP/IP socket.

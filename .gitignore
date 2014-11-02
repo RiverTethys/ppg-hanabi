@@ -2,6 +2,7 @@
 ## ppg-hanabi
 #################
 *.hanabidata
+*.json
 
 #################
 ## Eclipse

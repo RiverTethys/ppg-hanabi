@@ -11,6 +11,9 @@
 #   License for the specific language governing permissions and limitations
 #   under the License.
 #------------------------------------------------------------------------------
+#    NOTICE: this file has been modified from its original version 
+#    in order to work with Python 3.x
+#                         -- RiverTethys
 
 """
 Handle Asynchronous Telnet Connections.
@@ -116,7 +119,7 @@ class TelnetServer(object):
         """
         Perform a non-blocking scan of recv and send states on the server
         and client connection sockets.  Process new connection requests,
-        read incomming data, and send outgoing data.  Sends and receives may
+        read incoming data, and send outgoing data.  Sends and receives may
         be partial.
         """
         #print len(self.connections)
@@ -177,7 +180,7 @@ class TelnetServer(object):
                 self.on_connect(new_client)
 
             else:
-                ## Call the connection's recieve method
+                ## Call the connection's receive method
                 try:
                     self.clients[sock_fileno].socket_recv()
                 except BogConnectionLost:
