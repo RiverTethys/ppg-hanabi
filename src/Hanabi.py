@@ -1,10 +1,6 @@
 #####    RECENT CHANGES    #####
 # number of tags suggests importance of the comment 
 
-### A lot of the print statements in HanabiGame now have "if self.depth == 0:"  in front of them to clean up output. May move things around and do this with the deck initializations as well.
-### Okay, I have removed the automatic print_distr from Deck initialization. Now only if self.depth == 0 will the game call the deck's print_distr.
-
-
 ##### NEXT ROUND OF TO DO OPTIONS
 ## q. play conventions and play safety deductions
 ## w. discard conventions and discard safety deductions
@@ -21,7 +17,9 @@
 
 # we should check if it's okay to dump the Sim files
 
+## In progress_a, more calls are looped over all of the games (so that it works right)
 
+### A lot of the print statements in HanabiGame now have "if self.depth == 0:"  in front of them to clean up output. May move things around and do this with the deck initializations as well.
 
 ### progress_a  now has a bool function sims_consistent used to print confirmation that the sims are updating nicely so we only have to print the main game's info.
 ### You might think about whether we need to check any more details for consistency.
@@ -60,9 +58,17 @@
 #3. Make this happen erry turn (information goes in and all of the proper updates happen in the sim, and all of the updates in the sim) (again, done except maybe the AI parts)
 #3.b. AI turn vs. Person Turn (this probably happens as we work on the rest of A)
 
+
 #need input validation on "which card to play/discard" and "who's going first"
 
+
 #Not 100% sure if Events are going to be used for AI planning, but if they are, we may need some way to track 'intent' (e.g. protective clues, versus playing clues). Right now I'm attempting to use them (that is, the list of possible actions is actually a list of events)
+
+#right now there's nothing to enforce each card being in only one place at a time.
+#Zone???
+#The relationship between Variant and Game need to be worked out 
+
+
 
 from HanabiClasses import *
 
@@ -79,6 +85,9 @@ def sims_consistent(games):
 			return False
 	return True
 
+
+
+
 def update_tables(games):
 	for x in games:
 		for p in x.players:
@@ -89,10 +98,10 @@ def print_table_location_list(games,game_name,player_name,location_name):
 		if game_name == x.name:
 			for p in x.players:
 				if player_name == p.name:
-					AAA = p.trike.tab.get_location_list(location_name)
-					for aaa in AAA:
-						if len(AAA[aaa].pile) >0:
-							print ( str(aaa)+": "+str(AAA[aaa]))
+					location_dict = p.trike.tab.get_location_list(location_name)
+					for card in location_dict:
+						if len(location_dict[card].pile) >0:
+							print ( str(card)+": "+str(location_dict[card]))
 					print("\n")
 						
 def print_locations(games):
@@ -101,6 +110,7 @@ def print_locations(games):
 		print("\n\n**********"+x.name + "**********:\n")
 		for p in x.players:
 			print("\n---"+p.name+"---:\n")
+			print("Play Queue: "+str(p.trike.tab.play_q)+"\nDiscard Queue: "+str(p.trike.tab.discard_q)+"\n")
 			for l in x.decks:
 				print(l+":\n")
 				print_table_location_list(games,x.name,p.name,l)
@@ -113,6 +123,7 @@ def print_table_list(games,game_name,player_name,type,quality,value,spin):
 			for p in x.players:
 				if player_name == p.name:
 					print (p.trike.tab.make_short_list(type,quality,value,spin))
+
 
 def turn(games):
 	active_player = games[0].players[0]
