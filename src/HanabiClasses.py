@@ -662,7 +662,7 @@ class Tricorder(object):
 	
 	def update_table(self,game):
 		self.tab.update_location_list(game)
-		self.bot.update_positions(game)
+		self.tab.update_positions(game)
 		self.bot.update_playability(self.tab,game)
 		self.bot.update_discardability(self.tab)
 		self.bot.update_color(self.tab)
