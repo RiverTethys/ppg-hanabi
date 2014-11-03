@@ -937,9 +937,6 @@ class BitTable(object):
 			if card not in self.discard_q:
 				self.discard_q.append(card)	
 			self.add_bit(Hanabit("default","discardability","discardable","default",self),card)
-		
-	def get_location_list(self,location_name):
-		return self.location[location_name]
 	
 	def update_location_list(self,game):
 		self.location = {location.name: {card: self.list[card] for card in location.deck} 

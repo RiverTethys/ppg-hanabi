@@ -98,7 +98,7 @@ def print_table_location_list(games,game_name,player_name,location_name):
 		if game_name == x.name:
 			for p in x.players:
 				if player_name == p.name:
-					location_dict = p.trike.tab.get_location_list(location_name)
+					location_dict = p.trike.tab.location[location_name]
 					for card in location_dict:
 						if len(location_dict[card].pile) >0:
 							print ( str(card)+": "+str(location_dict[card]))
