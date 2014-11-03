@@ -697,7 +697,6 @@ class BitFolder(object):
 	def __repr__(self):
 		return str(self.pile)
 	
-	
 	def add_bit(self,bit):
 		self.folder[bit.quality][bit.value].append(bit)
 		self.pile.append(bit)
@@ -710,15 +709,22 @@ class BitFolder(object):
 		self.quality_pile[bit.quality].remove(bit)
 		self.value_pile[bit.value].remove(bit)
 	
-	def query_bit_pile(self,qtype=[1],qquality=[1],qvalue=[1],qspin=[1]):	 # makes list of bits meeting all criteria, input criteria as lists use [1] for "any"
+	def query_bit_pile(self,op="conj",qtype=[],qquality=[],qvalue=[],qspin=[]):	 # makes list of bits meeting criteria according to operator, input criteria as lists
 		temp_list = []
 		for bit in self.pile:
-			bool_type = bit.type in qtype or 1 in qtype
-			bool_quality = bit.quality in qquality or 1 in qquality
-			bool_value = bit.value in qvalue or 1 in qvalue
-			bool_spin = bit.spin in qspin or 1 in qspin
-			if (bool_type and bool_quality and bool_value and bool_spin):
-				temp_list.append(bit)
+			bool_type = bit.type in qtype or not qtype
+			bool_quality = bit.quality in qquality or not qquality
+			bool_value = bit.value in qvalue or not qvalue
+			bool_spin = bit.spin in qspin or not qspin
+			if op == "conj":
+				if (bool_type and bool_quality and bool_value and bool_spin):
+					temp_list.append(bit)
+			elif op == "disj":
+				if ((bool_type and qtype)
+				or (bool_quality and qquality)
+				or (bool_value and qvalue)
+				or (bool_spin and qspin)):
+					temp_list.append(bit)
 		return temp_list	
 	
 	def count_bits(self): #returns the size of the bit pile
