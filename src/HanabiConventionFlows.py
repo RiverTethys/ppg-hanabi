@@ -34,7 +34,7 @@ class PlayConventions(HanabiConventions):
 	def possible(self,table):
 		event_list = []
 		for card in table.location[table.name]:
-			if table.bool_query(qcard=card,qquality="playability",qspin="pos") or table.bool_query(qcard=card,qquality="playability",qspin="final"):
+			if table.list[card].query_bit_pile(qcard=card,qquality=["playability"],qspin=["pos"]) or table.list[card].query_bit_pile(qcard=card,qquality=["playability"],qspin=["final"]):
 				event_list.append( HanabiEvent(table.name,None,"Play",card.id,card.color,card.number))
 		return event_list
 
@@ -45,7 +45,7 @@ class DiscardConventions(HanabiConventions):
 	def possible(self,table):
 		event_list = []
 		for card in table.location[table.name]:
-			if table.bool_query(qcard=card,qquality="discardability",qvalue = "trash", qspin="final") or (table.bool_query(qcard=card,qquality="discardability",qvalue="discardable",qspin="pos") and not table.bool_query(qcard=card,qquality="playability",qvalue="playable",qspin ="pos")):
+			if table.list[card].query_bit_pile(qcard=card,qquality=["discardability"],qvalue = ["trash"], qspin=["final"]) or (table.list[card].query_bit_pile(qcard=card,qquality=["discardability"],qvalue=["discardable"],qspin=["pos"]) and not table.list[card].query_bit_pile(qcard=card,qquality=["playability"],qvalue=["playable"],qspin =["pos"])):
 				event_list.append( HanabiEvent(table.name,None,"Discard",card.id,card.color,card.number))
 		return event_list
 		

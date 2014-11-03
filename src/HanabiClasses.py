@@ -686,9 +686,6 @@ class Knowledge(object):
 		self.variant = variant
 		self.flog = future_log
 		self.plog = past_log
-
-		
-
 		
 class BitFolder(object):
 	def __init__(self,game,card):
@@ -704,7 +701,6 @@ class BitFolder(object):
 	def __repr__(self):
 		return str(self.pile)
 	
-	
 	def add_bit(self,bit):
 		self.folder[bit.quality][bit.value].append(bit)
 		self.pile.append(bit)
@@ -717,23 +713,28 @@ class BitFolder(object):
 		self.quality_pile[bit.quality].remove(bit)
 		self.value_pile[bit.value].remove(bit)
 	
-	def make_bit_pile(self,type,quality,value,spin):	 # makes list of bits meeting all criteria, input criteria as lists use [1] for "any"
+	def query_bit_pile(self,op="conj",qtype=[],qquality=[],qvalue=[],qspin=[]):	 # makes list of bits meeting criteria according to operator, input criteria as lists
 		temp_list = []
 		for bit in self.pile:
-			bool_type = bit.type in type or 1 in type
-			bool_quality = bit.quality in quality or 1 in quality
-			bool_value = bit.value in value or 1 in value
-			bool_spin = bit.spin in spin or 1 in spin
-			if (bool_type and bool_quality and bool_value and bool_spin):
-				temp_list.append(bit)
-		return temp_list
-	
-	
+			bool_type = bit.type in qtype or not qtype
+			bool_quality = bit.quality in qquality or not qquality
+			bool_value = bit.value in qvalue or not qvalue
+			bool_spin = bit.spin in qspin or not qspin
+			if op == "conj":
+				if (bool_type and bool_quality and bool_value and bool_spin):
+					temp_list.append(bit)
+			elif op == "disj":
+				if ((bool_type and qtype)
+				or (bool_quality and qquality)
+				or (bool_value and qvalue)
+				or (bool_spin and qspin)):
+					temp_list.append(bit)
+		return temp_list	
 	
 	def count_bits(self): #returns the size of the bit pile
 		return len(self.pile)
 	def count_bits(self,type,quality,value,spin): # returns number of bits meeting all criteria, input criteria as lists use [1] for "any"
-		return len(self.make_bit_pile(type,quality,value,spin))
+		return len(self.query_bit_pile(type,quality,value,spin))
 	
 	def clear(self,ctype = None, cquality = None, cvalue = None, cspin = None):
 		if (ctype and cspin):
@@ -803,8 +804,6 @@ class BitTable(object):
 	def __init__(self,game,player):  #May want to use id's for some of this?
 		self.decktemplate = game.variant.decktemplate
 		self.name = player.name
-		#self.list = {card: BitFolder(game,card) for card in game.card_list}
-		# is this okay to use instead?
 		self.list = {card: BitFolder(game,card) for card in game.decks["game_deck"].deck}
 		self.location = {location.name: {card: self.list[card] for card in location.deck} 
 		                                for deckname, location in game.decks.items()}
@@ -875,68 +874,6 @@ class BitTable(object):
 		x.add_bit(tail)
 		self.inc_bit_counter()
 	
-	def bool_query(self,qcard=None,qtype=None,qquality=None,qvalue=None,qspin=None): #returns True if there is a confirmed true bit that meets the criteria
-		if not (qcard):
-			return False
-		else: # no need to indent, but figured I'd take advantage, this block just sets up the inputs to make_bit_pile
-			if (qquality):
-				quality_list = [qquality]
-			else:
-				quality_list = [1]
-			if (qvalue):
-				value_list = [qvalue]
-			else:
-				value_list = [1]
-			if (qtype):
-				type_list = [qtype]
-			else:
-				type_list = [1]
-			if (qspin):
-				spin_list = [qspin]
-			else:
-				spin_list = [1]
-		
-		bit_pile = self.list[qcard].make_bit_pile(type_list,quality_list,value_list,spin_list)
-		
-		if bit_pile:
-			return True
-		
-		return False
-	
-	#AGAIN, keeping the old version:
-		# if not (qcard and qvalue):
-			# return False
-		# if (qtype and qspin):
-			# for bit in self.list[qcard].value_pile[qvalue]:
-				# if bit.type == qtype and bit.spin == qspin:
-					# return True
-			# return False
-		# if (qtype):
-			# for bit in self.list[qcard].value_pile[qvalue]:
-				# if bit.type == qtype and (bit.spin == "pos" or bit.spin == "final"):
-					# return True
-			# return False
-		# for bit in self.list[qcard].value_pile[qvalue]:
-			# if bit.type == "confirmed" and (bit.spin == "pos" or bit.spin == "final"):
-				# return True
-	
-	# Kept the old versions here to ensure I didnt miss anything
-		# def bool_query(self,card,type,value,spin): #returns True if there is a confirmed true bit that meets the criteria
-			# for bit in self.list[card].value_pile[value]:
-				# if bit.type == type and bit.spin == spin:
-					# return True
-			# return False
-		# def bool_query(self,card,type,value):
-			# for bit in self.list[card].value_pile[value]:
-				# if bit.type == type and (bit.spin == "pos" or bit.spin == "final"):
-					# return True
-			# return False
-		# def bool_query(self,card,value):
-			# for bit in self.list[card].value_pile[value]:
-				# if bit.type == "confirmed" and (bit.spin == "pos" or bit.spin == "final"):
-					# return True
-			# return False
-	
 	def gone(self,card):
 		return (card in self.location["Play"] or card in self.location["Discard"])
 	
@@ -991,7 +928,7 @@ class BitTable(object):
 					in_some_hand = True
 					self.new_position(card,p.name,game)
 			if (not in_some_hand):
-				if self.bool_query(qcard = card,qquality = "position", qspin = "final"):
+				if self.list[card].query_bit_pile(qcard = card,qquality = ["position"], qspin = ["final"]):
 					self.list[card].clear(cquality = "position")
 			
 			
@@ -1010,9 +947,6 @@ class BitTable(object):
 			if card not in self.discard_q:
 				self.discard_q.append(card)	
 			self.add_bit(Hanabit("default","discardability","discardable","default",self),card)
-		
-	def get_location_list(self,location_name):
-		return self.location[location_name]
 	
 	def update_location_list(self,game):
 		self.location = {location.name: {card: self.list[card] for card in location.deck} 
