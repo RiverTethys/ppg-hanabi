@@ -156,7 +156,7 @@ def initialize_hanabi():  ##Separated so that we can test things more easily on 
 	#deck_template = HanabiDeckTemplate(CARD_COLORS,CARD_NUMBERS,{x:{1:3,2:2,3:2,4:2,5:1} for x in ('R','Y','G','B','W','H')})
 	deck_template = HanabiDeckTemplate(CARD_COLORS,CARD_NUMBERS,{x:{1:3,2:2,3:2,4:2,5:1} for x in ('R','Y','G','B','W')})
 	
-	variant = HanabiVariant(2,5,deck_template,[])
+	variant = HanabiVariant(3,5,deck_template,[])
 
 	bot = DeductionBot(variant)
 	

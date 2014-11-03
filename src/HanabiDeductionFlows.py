@@ -100,7 +100,7 @@ class DeductionBot(object):
 		if len(known_color) == 1 and len(known_number) == 1:
 			#if it has already been played or if it's already a dead card, confirmed, trash, final		
 			if table.played(card) or table.dead(card):
-				Dbit = Hanabit("confirmed","discardability","trash","final",table)
+				Dbit = Hanabit("confirmed","discardability","discardable","final",table)
 				table.add_bit(Dbit,card)
 				if card in table.location[table.name]:
 					if card in table.play_q:

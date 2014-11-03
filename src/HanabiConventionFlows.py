@@ -6,8 +6,27 @@ class HanabiConventions(object):
 	def __init__(self,game):
 		self.bot = game.bot
 
-		
+	def oldest(self,card_list,table):
+		positions = []
+		position_dict = {}
+		for card in card_list:
+			for bit in table.list[card].quality_pile["position"]:
+				positions.append(bit.value)
+				position_dict[bit.value] = card
+		positions.sort()
+		return position_dict[positions[-1]]
+						
+	def newest(self,card_list,table):
+		positions = []
+		position_dict = {}
+		for card in card_list:
+			for bit in table.list[card].quality_pile["position"]:
+				positions.append(bit.value)
+				position_dict[bit.value] = card
+		positions.sort()
+		return position_dict[positions[0]]
 
+		
 class PlayConventions(HanabiConventions):
 	def __init__(self,game,active_player):
 		HanabiConventions.__init__(game)
@@ -44,9 +63,21 @@ class ClueConventions(HanabiConventions):
 					event_list.append(HanabiEvent(table.name,p.name,"Clue",None,None,number))
 		return event_list
 				
-				
-				
-				
+	def interpret_clue(self,table,game):			
+		#prepare bools
+		protective = False
+		playing = False
+		stalling = False
+		
+		
+		if(protective):
+			card_list = [x for x in table.location[table.name]]
+			
+		if(playing):
+			pass
+		if(stalling):
+		#not sure what this is gonna be
+			pass
 				
 				
 				

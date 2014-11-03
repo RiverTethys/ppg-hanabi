@@ -585,8 +585,10 @@ class HanabiNPC(Player):
 	def __init__(self,name,game):
 		Player.__init__(self,name,game)
 
-	def decision(self,game,deck):
-		pass
+	def decision(self,game):
+		last_card = game.decks[self.name].deck[0]
+		event = HanabiEvent(self.name,None,"Discard",last_card.id,last_card.color,last_card.number)
+		return event
 	
 	def analysis(self):
 		pass
@@ -690,8 +692,10 @@ class Knowledge(object):
 		
 class BitFolder(object):
 	def __init__(self,game,card):
+		self.types = ["confirmed","inkling","conventional","default"]
 		self.qualities = ["color","number","location","playability","discardability","position"]
-		self.values = {"color":game.colors,"number":game.numbers,"location":game.decks,"playability":["playable","not playable"],"discardability":["discardable","not discardable","trash"],"position":[x+1 for x in range(game.variant.handsize)]}
+		self.values = {"color":game.colors,"number":game.numbers,"location":game.decks,"playability":["playable"],"discardability":["discardable"],"position":[x+1 for x in range(game.variant.handsize)]}
+		self.spins = ["pos","neg","final","default"]
 		self.folder = {quality:{value:[] for value in self.values[quality]} for quality in self.qualities}
 		self.pile = []
 		self.quality_pile = {quality:[] for quality in self.qualities}
