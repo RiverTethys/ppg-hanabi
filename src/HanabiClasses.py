@@ -887,6 +887,13 @@ class BitTable(object):
 			if bit.type=="confirmed" and bit.spin == "final":
 				return True
 		return False
+
+	def clued_cards(self,ev):
+		if (ev.color):
+			card_list = [card for card in self.location[self.name] if card.color == ev.color]
+		if (ev.number):
+			card_list = [card for card in self.location[self.name] if card.number == ev.number]
+		return card_list
 	
 	def played(self,card):
 		card_match = set([x for x in self.list if x.color==card.color and x.number==card.number])

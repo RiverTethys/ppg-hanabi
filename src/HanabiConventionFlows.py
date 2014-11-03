@@ -62,25 +62,37 @@ class ClueConventions(HanabiConventions):
 				for number in self.bot.decktemplate.colors:
 					event_list.append(HanabiEvent(table.name,p.name,"Clue",None,None,number))
 		return event_list
-				
+	
+	
+	
+	def make_protective_clue(self):
+		pass
+	
+	def make_playing_clue(self):
+		pass
+	
+	def make_stalling_clue(self):
+		pass
+	
+	def make_multi_play_clue(self):
+		pass
+	
 	def interpret_clue(self,ev,table,game):			
 		#prepare bools
 		protective = False
 		playing = False
 		stalling = False
+		multi-play = False #ohgodohgodohgod
 		
+		indicated_card = self.newest(table.clued_cards(ev))
 		
-		# for card in self.decks[ev.tgt].deck:
-						# if ev.color:
-							# if (card.color == ev.color or card.color == "H"):
-								# # cards are printed to players in reverse order
-								# if self.depth == 0:
-									# print(" {}".format(len(self.decks[ev.tgt].deck) - self.decks[ev.tgt].deck.index(card)))
-						# elif ev.number:
-							# if (card.number == ev.number):
-								# # cards are printed to players in reverse order
-								# if self.depth == 0:
-									# print(" {}".format(len(self.decks[ev.tgt].deck) - self.decks[ev.tgt].deck.index(card)))
+		### could make room for stalling and multi_play
+		
+		# if clued about a "totally" unplayable card, then it's protective
+		if table.list[indicated_card].query_bit_pile(qtype="confirmed",qvalue="playable",qspin="neg"):
+			protective = True
+		else:
+			playing = True
 		
 		#resolve bools
 		if(protective):
@@ -89,22 +101,22 @@ class ClueConventions(HanabiConventions):
 			table.add_bit(Ibit,protected_card)		
 	
 		if(playing):
-			if (ev.color):
-				card_list = [card for card in table.location[table.name] if card.color == ev.color]
-			if (ev.number):
-				card_list = [card for card in table.location[table.name] if card.number == ev.number]
-			playable_card = self.newest(card_list,table)
+			playable_card = self.newest(table.clued_cards(ev),table)
 			Ibit = Hanabit("conventional","playability","playable","pos")
-			table.add_bit(Ibit,playable_card)
-			if playable_card in table.play_q:
-				table.play_q.remove(playable_card)
-			table.play_q.appendleft(playable_card)
+			table.add_bit(Ibit,indicated_card)
+			if indicated_card in table.play_q:
+				table.play_q.remove(indicated_card)
+			table.play_q.appendleft(indicated_card)
 			
+		if (multi-play):
+		#ohgodohgodohgod	
+			pass
 		
 		if(stalling):
 		#not sure what this is gonna be, if anything
 			pass
-				
+		
+		
 				
 				
 				
