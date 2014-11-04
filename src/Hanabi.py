@@ -137,7 +137,6 @@ def initialize_hanabi():  ##Separated so that we can test things more easily on 
 	variant = HanabiVariant(3,5,deck_template,[])
 
 	bot = DeductionBot(variant)
-	
 	player_name_list = ["Ted","Matthew"]
 	
 	SIM_DEPTH = 2
@@ -150,6 +149,8 @@ def initialize_hanabi():  ##Separated so that we can test things more easily on 
 	for i in range(SIM_DEPTH):
 		games.append(HanabiSim("sim" + str(i+1), game, sim_name_list, i + 1))
 	
+	for x in games:
+		x.set_conventions(HanabiConventions(x))
 	
 	#for testing...
 	print("[Game, player list, deck size]:")

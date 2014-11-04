@@ -27,9 +27,9 @@ class HanabiConventions(object):
 		return position_dict[positions[0]]
 
 		
-class PlayConventions(HanabiConventions):
-	def __init__(self,game,active_player):
-		HanabiConventions.__init__(game)
+#class PlayConventions(HanabiConventions):
+	#def __init__(self,game,active_player):
+		#HanabiConventions.__init__(game)
 	
 	def possible(self,table):
 		event_list = []
@@ -38,9 +38,9 @@ class PlayConventions(HanabiConventions):
 				event_list.append( HanabiEvent(table.name,None,"Play",card.id,card.color,card.number))
 		return event_list
 
-class DiscardConventions(HanabiConventions):
-	def __init__(self,game):
-		HanabiConventions.__init__(game)
+#class DiscardConventions(HanabiConventions):
+	#def __init__(self,game):
+		#HanabiConventions.__init__(game)
 
 	def possible(self,table):
 		event_list = []
@@ -49,9 +49,9 @@ class DiscardConventions(HanabiConventions):
 				event_list.append( HanabiEvent(table.name,None,"Discard",card.id,card.color,card.number))
 		return event_list
 		
-class ClueConventions(HanabiConventions):
-	def __init__(self,game):
-		HanabiConventions.__init__(game)
+#class ClueConventions(HanabiConventions):
+#	def __init__(self,game):
+#		HanabiConventions.__init__(game)
 				
 	def possible(self,table):
 		event_list = []
@@ -89,7 +89,7 @@ class ClueConventions(HanabiConventions):
 		### could make room for stalling and multi_play
 		
 		# if clued about a "totally" unplayable card, then it's protective
-		if table.list[indicated_card].query_bit_pile(qtype="confirmed",qvalue="playable",qspin="neg"):
+		if table.list[indicated_card].query_bit_pile(qtype=["confirmed"],qvalue=["playable"],qspin=["neg"]):
 			protective = True
 		else:
 			playing = True

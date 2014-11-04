@@ -278,6 +278,9 @@ class HanabiGame(object):
 		self.future_log = deque([HanabiEvent(None,None,None,None,None,None) for x in range(MAX_TURNS)])
 		self.past_log = []
 	
+	def set_conventions(self,conventions):
+		self.con = conventions
+	
 	def inc_clocks(self):
 		self.clocks += 1
 		
@@ -380,6 +383,7 @@ class HanabiGame(object):
 									print(" {}".format(len(self.decks[ev.tgt].deck) - self.decks[ev.tgt].deck.index(card)))
 			elif p.name == ev.tgt:
 				p.trike.bot.receive_clue(ev,p.trike.tab)
+				p.trike.con.interpret_clue(ev,p.trike.tab)
 		#Append the event to my own event log.
 		self.past_log.append(ev)
 	
