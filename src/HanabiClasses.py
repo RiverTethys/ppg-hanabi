@@ -968,6 +968,9 @@ class BitTable(object):
 		self.location = {location.name: {card: self.list[card] for card in location.deck} 
 		                                for deckname, location in game.decks.items()}
 	
+	def update_critical_list(self):
+		self.critical = {card: self.list[card]  for card in self.list if (self.only_one(card.color,card.number) and not self.gone(card))}
+	
 	def new_visible(self,card,location,game):
 		if not self.final(card,"color"):
 			color_bit = Hanabit("confirmed","color",card.color,"final",self)
@@ -977,8 +980,10 @@ class BitTable(object):
 			self.add_bit(number_bit,card)
 		self.new_location(card,location,game)
 	
-	def update_all_lists(self):
-		pass
+	def update_all_lists(self,game):
+		self.update_location_list(game)
+		self.update_critical_list()
+		
 	
 
 	

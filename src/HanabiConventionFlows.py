@@ -69,15 +69,35 @@ class HanabiConventions(object):
 	
 	
 	
+	def will_it_bomb(self,ev):
+		pass
+	
+	
+	
+	
 	def predict_clue(self,ev,table):
 		#possible ways the clue could go.
-		protective = False
-		playing = False
-		stalling = False
-		multi_play = False
-		bombing = False
+		possibilties = ["playing", "bombing", "protective","dud","multi-play","stalling"]
 		
-	
+		
+		if (table.clued_cards(ev)):
+			indicated_card = self.newest(table.clued_cards(ev),table)
+			
+			if table.list[indicated_card].query_bit_pile(qtype=["confirmed"],qvalue=["playable"],qspin=["pos","final"]):
+				return "playing"
+			elif: # (knowing the information the clue gives might lead the tgt to think the indicated card was playable)
+				pass #then it would be a bombing clue
+			elif: # there's also a critical card that's about to be discarded
+				pass #then it would be a protective clue
+			
+		else: 
+			pass #this clue is possibly a dud... but with simulation predicitons we may see that non-clue clues allow plays to be made
+		
+	# playable_cards = set([x for x in table.list if self.playable(x,game)])
+		
+		# possible_cards = set(self.cards_that_can_be(card,table))
+		
+		# if possible_cards <= playable_cards:
 	
 	def interpret_clue(self,ev,table,game):			
 		#prepare bools
