@@ -61,14 +61,14 @@ class DeductionBot(object):
 	
 	
 	def deduce_playability(self,card,table,game):
-		if table.list[card].query_bit_pile(qcard = card,qtype=["confirmed"], qquality = ["playability"],qspin = ["final"]):
+		if table.list[card].query_bit_pile(qtype=["confirmed"], qquality = ["playability"],qspin = ["final"]):
 			return
 		playable_cards = set([x for x in table.list if self.playable(x,game)])
 		
 		possible_cards = set(self.cards_that_can_be(card,table))
 		
 		if possible_cards <= playable_cards:
-			if table.list.query_bit_pile(qcard = card, qvalue = [5],qspin = ["final"]):
+			if table.list[card].query_bit_pile( qvalue = [5],qspin = ["final"]):
 				Pbit = Hanabit("confirmed","playability","playable","final",table)
 			else:
 				Pbit = Hanabit("confirmed","playability","playable","pos",table)
@@ -83,7 +83,7 @@ class DeductionBot(object):
 					table.play_q.remove(card)
 					table.play_q.appendleft(card)
 		else:
-			if table.list[card].query_bit_pile(qcard= card,qtype =["confirmed"],qvalue = ["playable"],qspin=["pos"]):
+			if table.list[card].query_bit_pile(qtype =["confirmed"],qvalue = ["playable"],qspin=["pos"]):
 				Pbit = Hanabit("confirmed","playability","playable","pos",table)
 				table.list[card].remove_bit(Pbit)
 			if card in table.location[table.name]:
@@ -91,10 +91,10 @@ class DeductionBot(object):
 					table.play_q.remove(card)  #Our first set of bot will be super cautious
 		
 	def deduce_discardability(self,card,table):
-		if table.list[card].query_bit_pile(qcard = card, qquality = ["discardability"],qspin = ["final"]):
+		if table.list[card].query_bit_pile(qquality = ["discardability"],qspin = ["final"]):
 			return
-		known_color = table.list[card].query_bit_pile(["confirmed"],["color"],[1],["final","pos"])
-		known_number = table.list[card].query_bit_pile(["confirmed"],["number"],[1],["final","pos"])
+		known_color = table.list[card].query_bit_pile(qtype =["confirmed"],qquality = ["color"],qspin = ["final","pos"])
+		known_number = table.list[card].query_bit_pile(qtype = ["confirmed"],qquality = ["number"],qspin = ["final","pos"])
 		#print(known_color)
 		#print(known_number)
 		if len(known_color) == 1 and len(known_number) == 1:

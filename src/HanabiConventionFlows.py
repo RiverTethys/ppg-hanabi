@@ -2,6 +2,9 @@
 
 ### We need to work on solidifying our list of qualities and values
 
+
+from HanabiDeductionFlows import *
+
 class HanabiConventions(object):
 	def __init__(self,game):
 		self.bot = game.bot
@@ -23,76 +26,96 @@ class HanabiConventions(object):
 			for bit in table.list[card].quality_pile["position"]:
 				positions.append(bit.value)
 				position_dict[bit.value] = card
-		positions.sort()
-		return position_dict[positions[0]]
+		if (positions):
+			positions.sort()
+			return position_dict[positions[0]]
 
 		
-class PlayConventions(HanabiConventions):
-	def __init__(self,game,active_player):
-		HanabiConventions.__init__(game)
+#class PlayConventions(HanabiConventions):
+	#def __init__(self,game,active_player):
+		#HanabiConventions.__init__(game)
 	
-	def possible(self,table):
-		event_list = []
-		for card in table.location[table.name]:
-			if table.list[card].query_bit_pile(qcard=card,qquality=["playability"],qspin=["pos"]) or table.list[card].query_bit_pile(qcard=card,qquality=["playability"],qspin=["final"]):
-				event_list.append( HanabiEvent(table.name,None,"Play",card.id,card.color,card.number))
-		return event_list
+	# def possible(self,table):
+		# event_list = []
+		# for card in table.location[table.name]:
+			# if table.list[card].query_bit_pile(qcard=card,qquality=["playability"],qspin=["pos"]) or table.list[card].query_bit_pile(qcard=card,qquality=["playability"],qspin=["final"]):
+				# event_list.append( HanabiEvent(table.name,None,"Play",card.id,card.color,card.number))
+		# return event_list
 
-class DiscardConventions(HanabiConventions):
-	def __init__(self,game):
-		HanabiConventions.__init__(game)
+#class DiscardConventions(HanabiConventions):
+	#def __init__(self,game):
+		#HanabiConventions.__init__(game)
 
-	def possible(self,table):
-		event_list = []
-		for card in table.location[table.name]:
-			if table.list[card].query_bit_pile(qcard=card,qquality=["discardability"],qvalue = ["trash"], qspin=["final"]) or (table.list[card].query_bit_pile(qcard=card,qquality=["discardability"],qvalue=["discardable"],qspin=["pos"]) and not table.list[card].query_bit_pile(qcard=card,qquality=["playability"],qvalue=["playable"],qspin =["pos"])):
-				event_list.append( HanabiEvent(table.name,None,"Discard",card.id,card.color,card.number))
-		return event_list
+	# def possible(self,table):
+		# event_list = []
+		# for card in table.location[table.name]:
+			# if table.list[card].query_bit_pile(qcard=card,qquality=["discardability"],qvalue = ["trash"], qspin=["final"]) or (table.list[card].query_bit_pile(qcard=card,qquality=["discardability"],qvalue=["discardable"],qspin=["pos"]) and not table.list[card].query_bit_pile(qcard=card,qquality=["playability"],qvalue=["playable"],qspin =["pos"])):
+				# event_list.append( HanabiEvent(table.name,None,"Discard",card.id,card.color,card.number))
+		# return event_list
 		
-class ClueConventions(HanabiConventions):
-	def __init__(self,game):
-		HanabiConventions.__init__(game)
+#class ClueConventions(HanabiConventions):
+#	def __init__(self,game):
+#		HanabiConventions.__init__(game)
 				
-	def possible(self,table):
-		event_list = []
-		for p in self.players:
-			if p.name != table.name:
-				for color in self.bot.decktemplate.colors:
-					event_list.append(HanabiEvent(table.name,p.name,"Clue",None,color,None))
-				for number in self.bot.decktemplate.colors:
-					event_list.append(HanabiEvent(table.name,p.name,"Clue",None,None,number))
-		return event_list
+	# def possible(self,table):
+		# event_list = []
+		# for p in self.players:
+			# if p.name != table.name:
+				# for color in self.bot.decktemplate.colors:
+					# event_list.append(HanabiEvent(table.name,p.name,"Clue",None,color,None))
+				# for number in self.bot.decktemplate.colors:
+					# event_list.append(HanabiEvent(table.name,p.name,"Clue",None,None,number))
+		# return event_list
 	
 	
 	
-	def make_protective_clue(self):
+	def will_it_bomb(self,ev):
 		pass
 	
-	def make_playing_clue(self):
-		pass
 	
-	def make_stalling_clue(self):
-		pass
 	
-	def make_multi_play_clue(self):
-		pass
+	
+	def predict_clue(self,ev,table):
+		#possible ways the clue could go.
+		possibilties = ["playing", "bombing", "protective","dud","multi-play","stalling"]
+		
+		
+		if (table.clued_cards(ev)):
+			indicated_card = self.newest(table.clued_cards(ev),table)
+			
+			if table.list[indicated_card].query_bit_pile(qtype=["confirmed"],qvalue=["playable"],qspin=["pos","final"]):
+				return "playing"
+			elif: # (knowing the information the clue gives might lead the tgt to think the indicated card was playable)
+				pass #then it would be a bombing clue
+			elif: # there's also a critical card that's about to be discarded
+				pass #then it would be a protective clue
+			
+		else: 
+			pass #this clue is possibly a dud... but with simulation predicitons we may see that non-clue clues allow plays to be made
+		
+	# playable_cards = set([x for x in table.list if self.playable(x,game)])
+		
+		# possible_cards = set(self.cards_that_can_be(card,table))
+		
+		# if possible_cards <= playable_cards:
 	
 	def interpret_clue(self,ev,table,game):			
 		#prepare bools
 		protective = False
 		playing = False
 		stalling = False
-		multi-play = False #ohgodohgodohgod
+		multi_play = False #ohgodohgodohgod
 		
-		indicated_card = self.newest(table.clued_cards(ev))
+		if (table.clued_cards(ev)):
+			indicated_card = self.newest(table.clued_cards(ev),table)
 		
 		### could make room for stalling and multi_play
 		
 		# if clued about a "totally" unplayable card, then it's protective
-		if table.list[indicated_card].query_bit_pile(qtype="confirmed",qvalue="playable",qspin="neg"):
-			protective = True
-		else:
-			playing = True
+			if table.list[indicated_card].query_bit_pile(qtype=["confirmed"],qvalue=["playable"],qspin=["neg"]):
+				protective = True
+			else:
+				playing = True
 		
 		#resolve bools
 		if(protective):
@@ -102,13 +125,13 @@ class ClueConventions(HanabiConventions):
 	
 		if(playing):
 			playable_card = self.newest(table.clued_cards(ev),table)
-			Ibit = Hanabit("conventional","playability","playable","pos")
+			Ibit = Hanabit("conventional","playability","playable","pos",table)
 			table.add_bit(Ibit,indicated_card)
 			if indicated_card in table.play_q:
 				table.play_q.remove(indicated_card)
 			table.play_q.appendleft(indicated_card)
 			
-		if (multi-play):
+		if (multi_play):
 		#ohgodohgodohgod	
 			pass
 		
