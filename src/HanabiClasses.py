@@ -10,8 +10,6 @@ from HanabiConventionFlows import *
 from collections import deque
 import random
 
-
-
 class Card(object):
 	def __init__(self,id,color,number):
 		self.id = id
@@ -138,7 +136,6 @@ class HanabiDeckTemplate(object):
 				size+=num
 		return size
 
-
 class HanabiVariant(object):
 	def __init__(self,playernum,handsize,decktemplate,rules):
 		self.playernum = playernum
@@ -160,7 +157,7 @@ class HanabiEvent(object):
 		self.id = id
 		self.color = color
 		self.number = number
-
+		self.touch = []
 		
 	def __repr__(self):
 		if (self.src == None):
@@ -186,7 +183,6 @@ class HanabiEvent(object):
 		self.color = color
 		self.number = number
 
-		
 	def make_play(self,src,id,color,number):
 		self.src = src
 		self.type = "Play"
@@ -194,7 +190,6 @@ class HanabiEvent(object):
 		self.color = color
 		self.number = number
 
-		
 	def make_discard(self,src,id,color,number):
 		self.src = src
 		self.type = "Discard"
@@ -202,7 +197,6 @@ class HanabiEvent(object):
 		self.color = color
 		self.number = number
 
-		
 class HanabiGame(object):
 	def __init__(self,name,variant,conventions,deduction_bot,player_name_list,total_depth,depth):
 		self.name = name
@@ -308,7 +302,7 @@ class HanabiGame(object):
 				dude.trike.tab.new_location(card,"Play",self)
 			player.trike.tab.new_visible(card,"Play",self)
 			
-			if len(self.play) == 25: #need to change this to reference a value based on the variant
+			if len(self.play) == 25:
 				self.victory = True
 		else:
 			self.bomb()
@@ -371,10 +365,12 @@ class HanabiGame(object):
 						if ev.color:
 							if (card.color == ev.color or card.color == "H"):
 								# cards are printed to players in reverse order
+								ev.touch.append(deepcopy(card))
 								if self.depth == 0:
 									print(" {}".format(len(self.decks[ev.tgt].deck) - self.decks[ev.tgt].deck.index(card)))
 						elif ev.number:
 							if (card.number == ev.number):
+								ev.touch.append(deepcopy(card))
 								# cards are printed to players in reverse order
 								if self.depth == 0:
 									print(" {}".format(len(self.decks[ev.tgt].deck) - self.decks[ev.tgt].deck.index(card)))
@@ -464,7 +460,6 @@ class HanabiGame(object):
 		for dude in self.players:
 			self.write_state(dude)
 	
-
 class Player(object):
 	def __init__(self,name,game):
 		self.name = name
@@ -579,8 +574,6 @@ class Player(object):
 				break
 		return current_event
 		
-
-
 class HanabiNPC(Player):
 	def __init__(self,name,game):
 		Player.__init__(self,name,game)
@@ -592,9 +585,7 @@ class HanabiNPC(Player):
 	
 	def analysis(self):
 		pass
-
-
-		
+	
 class HanabiSimNPC(HanabiNPC):
 	def __init__(self,name,game,N):
 		HanabiNPC.__init__(self,name,game)
@@ -611,8 +602,6 @@ class HanabiSimNPC(HanabiNPC):
 			return True
 		return False
 	
-		
-
 class HanabiSim(HanabiGame):
 	def __init__(self,name,game,sim_player_list,N):
 		game_copy = deepcopy(game)
@@ -640,12 +629,10 @@ class HanabiSim(HanabiGame):
 		for dude in self.players:
 			dude.initialize_trike(self)
 	
-
-
 class Tricorder(object):
 	def __init__(self, game,player):
 		self.name = player.name
-		self.tab = BitTable(game,player)
+		self.tab = BitTable(game,pl=player)
 		self.bot = game.bot
 		self.con = game.con
 		
@@ -678,7 +665,6 @@ class Tricorder(object):
 	def decide(self):
 		pass
 
-	
 class Knowledge(object): 
 	def __init__(self,player,game,variant, future_log,past_log):
 		self.player = player
@@ -795,22 +781,27 @@ class BitFolder(object):
 			# if bit.type == type:
 				# self.remove_bit(bit)
 		
-
 class HanabiList(object):
 	def __init__(self): #The thought here is to make counting and short_list assembly cleaner
 		pass
 		
 class BitTable(object):
-	def __init__(self,game,player):  #May want to use id's for some of this?
+	def __init__(self,game,pl=None):  #May want to use id's for some of this?
 		self.decktemplate = game.variant.decktemplate
-		self.name = player.name
+		if pl:
+			self.name = pl.name
+		else:
+			self.name = "None"
 		self.list = {card: BitFolder(game,card) for card in game.decks["game_deck"].deck}
 		self.location = {location.name: {card: self.list[card] for card in location.deck} 
 		                                for deckname, location in game.decks.items()}
 		self.known = {card: self.list[card] for card in self.list if self.fixed(card)}
 		self.critical = {card: self.list[card]  for card in self.list if (self.only_one(card.color,card.number) and not self.gone(card))}
 		self.play_q = deque([])
-		self.discard_q = deque(deepcopy(game.decks[player.name].deck))
+		if pl:
+			self.discard_q = deque(deepcopy(game.decks[pl.name].deck))
+		else:
+			self.discard_q = deque([])
 		#and other pre-organized lists of bit folders
 		self.bit_counter = 0
 	
