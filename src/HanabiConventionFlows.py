@@ -2,6 +2,9 @@
 
 ### We need to work on solidifying our list of qualities and values
 
+
+from HanabiDeductionFlows import *
+
 class HanabiConventions(object):
 	def __init__(self,game):
 		self.bot = game.bot
@@ -23,8 +26,9 @@ class HanabiConventions(object):
 			for bit in table.list[card].quality_pile["position"]:
 				positions.append(bit.value)
 				position_dict[bit.value] = card
-		positions.sort()
-		return position_dict[positions[0]]
+		if (positions):
+			positions.sort()
+			return position_dict[positions[0]]
 
 		
 #class PlayConventions(HanabiConventions):
@@ -80,17 +84,18 @@ class HanabiConventions(object):
 		protective = False
 		playing = False
 		stalling = False
-		multi-play = False #ohgodohgodohgod
+		multi_play = False #ohgodohgodohgod
 		
-		indicated_card = self.newest(table.clued_cards(ev))
+		if (table.clued_cards(ev)):
+			indicated_card = self.newest(table.clued_cards(ev),table)
 		
 		### could make room for stalling and multi_play
 		
 		# if clued about a "totally" unplayable card, then it's protective
-		if table.list[indicated_card].query_bit_pile(qtype=["confirmed"],qvalue=["playable"],qspin=["neg"]):
-			protective = True
-		else:
-			playing = True
+			if table.list[indicated_card].query_bit_pile(qtype=["confirmed"],qvalue=["playable"],qspin=["neg"]):
+				protective = True
+			else:
+				playing = True
 		
 		#resolve bools
 		if(protective):
@@ -100,13 +105,13 @@ class HanabiConventions(object):
 	
 		if(playing):
 			playable_card = self.newest(table.clued_cards(ev),table)
-			Ibit = Hanabit("conventional","playability","playable","pos")
+			Ibit = Hanabit("conventional","playability","playable","pos",table)
 			table.add_bit(Ibit,indicated_card)
 			if indicated_card in table.play_q:
 				table.play_q.remove(indicated_card)
 			table.play_q.appendleft(indicated_card)
 			
-		if (multi-play):
+		if (multi_play):
 		#ohgodohgodohgod	
 			pass
 		

@@ -280,6 +280,8 @@ class HanabiGame(object):
 	
 	def set_conventions(self,conventions):
 		self.con = conventions
+		for p in self.players:
+			p.trike.set_conventions(self.con)
 	
 	def inc_clocks(self):
 		self.clocks += 1
@@ -383,7 +385,7 @@ class HanabiGame(object):
 									print(" {}".format(len(self.decks[ev.tgt].deck) - self.decks[ev.tgt].deck.index(card)))
 			elif p.name == ev.tgt:
 				p.trike.bot.receive_clue(ev,p.trike.tab)
-				p.trike.con.interpret_clue(ev,p.trike.tab)
+				p.trike.con.interpret_clue(ev,p.trike.tab,self)
 		#Append the event to my own event log.
 		self.past_log.append(ev)
 	
@@ -661,7 +663,10 @@ class Tricorder(object):
 			return
 		else:
 			return self.simulate(game,EventList,n-1)
-		
+	
+	def set_conventions(self, conventions):
+		self.con = conventions
+	
 	def run_sim(self,game,action,n):
 		CurrentState = game.past_log
 		game.take_action(action)
@@ -894,9 +899,9 @@ class BitTable(object):
 
 	def clued_cards(self,ev):
 		if (ev.color):
-			card_list = [card for card in self.location[self.name] if card.color == ev.color]
+			card_list = [card for card in self.location[ev.tgt] if card.color == ev.color]
 		if (ev.number):
-			card_list = [card for card in self.location[self.name] if card.number == ev.number]
+			card_list = [card for card in self.location[ev.tgt] if card.number == ev.number]
 		return card_list
 	
 	def played(self,card):
@@ -939,7 +944,7 @@ class BitTable(object):
 					in_some_hand = True
 					self.new_position(card,p.name,game)
 			if (not in_some_hand):
-				if self.list[card].query_bit_pile(qcard = card,qquality = ["position"], qspin = ["final"]):
+				if self.list[card].query_bit_pile(qquality = ["position"], qspin = ["final"]):
 					self.list[card].clear(cquality = "position")
 			
 			
