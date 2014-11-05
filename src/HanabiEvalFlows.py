@@ -67,6 +67,8 @@ def create_comp_tab(player):
 	return deepcopy(player.trike.tab)
 	
 def pos_to_card(player,pos):
-	pass
+	for card in player.trike.tab.location[player.name]:
+		if player.trike.tab.list[card].query_bit_pile(qquality="position",qvalue=pos):
+			return card
 	#convert a hand position into a card that can be 
 	#used to create an Event
