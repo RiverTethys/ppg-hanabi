@@ -9,7 +9,7 @@ class HanabiConventions(object):
 	def __init__(self,game):
 		self.bot = game.bot
 
-	def oldest(self,card_list,table):
+	def oldest(self,card_list,table): #returns card in oldest position from a list of cards, a subset of someone's hand
 		positions = []
 		position_dict = {}
 		for card in card_list:
@@ -19,7 +19,7 @@ class HanabiConventions(object):
 		positions.sort()
 		return position_dict[positions[-1]]
 						
-	def newest(self,card_list,table):
+	def newest(self,card_list,table): #returns the newest card from a subset of a hand
 		positions = []
 		position_dict = {}
 		for card in card_list:
@@ -30,7 +30,56 @@ class HanabiConventions(object):
 			positions.sort()
 			return position_dict[positions[0]]
 
+	
+
+	def order_play_q(self,table): #put certainly playable cards before conventionally playable cards before inkling playable
+		for card in deepcopy(table.play_q):
+			if table.list[card].query_bit_pile(qquality = ["playability"],qtype = ["inkling"]):
+				table.play_q.remove(card)
+				table.play_q.append(card)
 		
+		for card in deepcopy(table.play_q):
+			if table.list[card].query_bit_pile(qquality=["playability"],qtype = ["confirmed"]):
+				table.play_q.remove(card)
+				table.play_q.appendleft(card)
+	
+		for card in deepcopy(table.play_q):
+			if table.list[card].query_bit_pile(qquality = ["playability"],qspin = ["final"]):
+				table.play_q.remove(card)
+				table.play_q.appendleft(card)
+	 
+	def order_discard_q(self,table): #put certainly discardable cards before conventionally discardable before inkling or default discardable
+		for card in deepcopy(table.play_q):	
+			if table.list[card].query_bit_pile(qquality = ["discardability"],qtype = ["inkling"],qspin = ["neg"]):
+				table.play_q.remove(card)
+				table.play_q.appendleft(card)
+		
+		for card in deepcopy(table.play_q):
+			if table.list[card].query_bit_pile(qquality = ["discardability"],qtype = ["default"]):
+				table.play_q.remove(card)
+				table.play_q.appendleft(card)
+		
+		for card in deepcopy(table.play_q):	
+			if table.list[card].query_bit_pile(qquality = ["discardability"],qtype = ["inkling"],qspin = ["pos","final"]):
+				table.play_q.remove(card)
+				table.play_q.appendleft(card)
+		
+		for card in deepcopy(table.play_q):	
+			if table.list[card].query_bit_pile(qquality=["discardability"],qtype = ["conventional"]):
+				table.play_q.remove(card)
+				table.play_q.appendleft(card)
+			
+		for card in deepcopy(table.play_q):
+			if table.list[card].query_bit_pile(qquality=["discardability"],qtype = ["confirmed"]):
+				table.play_q.remove(card)
+				table.play_q.appendleft(card)
+			
+		for card in deepcopy(table.play_q):
+			if table.list[card].query_bit_pile(qquality = ["discardability"],qspin = ["final"]):
+				table.play_q.remove(card)
+				table.play_q.appendleft(card)
+		
+	
 #class PlayConventions(HanabiConventions):
 	#def __init__(self,game,active_player):
 		#HanabiConventions.__init__(game)
@@ -69,7 +118,7 @@ class HanabiConventions(object):
 	
 	
 	
-	def will_it_bomb(self,ev):
+	def will_it_bomb(self,ev): #see Will It Blend with lighters
 		pass
 	
 	

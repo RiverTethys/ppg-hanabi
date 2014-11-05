@@ -24,9 +24,19 @@ class DeductionBot(object):
 				return True
 		return False
 	
+	def turns_since_clued(self,card,game): #returns integer number of turns since _last_ clued about a given card. Minimum 1. 0 means never.
+		time_indices = []
+		for i, ev in enumerate(game.past_log):
+			if (ev.type == "Clue" and card in ev.touch):
+				time_indices.append(i)
+		if time_indices:
+			return len(game.past_log) - time_indices[-1]
+		else:
+			return 0
 	
 	
-	def cards_that_can_be(self,card,table): #for the given card, return the _SET_ of cards it could be
+	
+	def cards_that_can_be(self,card,table): #for the given card, return the LIST of cards it could be
 		if table.fixed(card):
 			return set([card])
 		card_list = [x for x in table.list if not table.gone(x)]
