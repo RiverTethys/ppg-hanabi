@@ -232,7 +232,8 @@ class DeductionBot(object):
 		
 	def receive_clue(self,ev,table):
 		if ev.color:
-			for card in table.location[ev.tgt]:
+			#for card in table.location[ev.tgt]:
+			for card in ev.touch:
 				if card.color == ev.color:
 					Fbit = Hanabit("confirmed","color",ev.color,"final",table)
 					table.add_bit(Fbit,card)
@@ -240,7 +241,8 @@ class DeductionBot(object):
 					Nbit = Hanabit("confirmed","color",ev.color,"neg",table)
 					table.add_bit(Nbit,card)
 		if ev.number:
-			for card in table.location[ev.tgt]:
+			#for card in table.location[ev.tgt]:
+			for card in ev.touch:
 				if card.number == ev.number:
 					Fbit = Hanabit("confirmed","number",ev.number,"final",table)
 					table.add_bit(Fbit,card)

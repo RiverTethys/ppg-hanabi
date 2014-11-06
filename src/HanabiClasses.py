@@ -367,15 +367,17 @@ class HanabiGame(object):
 						print(ev)
 						print("\nThey're in positions:")
 					for card in self.decks[ev.tgt].deck:
+						# Every card currently in target hand is 
+						# touched by the clue because negative
+						# information counts too
+						ev.touch.append(deepcopy(card))
 						if ev.color:
 							if (card.color == ev.color or card.color == "H"):
 								# cards are printed to players in reverse order
-								ev.touch.append(deepcopy(card))
 								if self.depth == 0:
 									print(" {}".format(len(self.decks[ev.tgt].deck) - self.decks[ev.tgt].deck.index(card)))
 						elif ev.number:
 							if (card.number == ev.number):
-								ev.touch.append(deepcopy(card))
 								# cards are printed to players in reverse order
 								if self.depth == 0:
 									print(" {}".format(len(self.decks[ev.tgt].deck) - self.decks[ev.tgt].deck.index(card)))

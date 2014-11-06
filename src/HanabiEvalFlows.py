@@ -1,4 +1,7 @@
 from copy import deepcopy
+from HanabiDeductionFlows import *
+from HanabiConventionFlows import *
+
 class Choice(object):
 	def __init__(self,action=None,tgt=None,color=None,number=None,pos=None):
 		self.action = action
@@ -39,28 +42,18 @@ def ikyk(game,player,other):
 		temptab.add_bit(Hanabit("confirmed","number",card.number,"final",temptab),card)
 		temptab.add_bit(Hanabit("confirmed","location","Discard","final",temptab),card)
 	for pl in game.players:
-		if (pl.name != player.name and pl.name != other.name):
-			for card in game.decks[pl.name].deck:
+		for card in game.decks[pl.name].deck:
+			if (pl.name != player.name and pl.name != other.name):
 				temptab.add_bit(Hanabit("confirmed","color",card.color,"final",temptab),card)
 				temptab.add_bit(Hanabit("confirmed","number",card.number,"final",temptab),card)
-				temptab.add_bit(Hanabit("confirmed","location",pl.name,"final",temptab),card)
+			temptab.add_bit(Hanabit("confirmed","location",pl.name,"final",temptab),card)
 	#Consult the log to find all clues given regarding 
 	#cards *currently* not visible to each of the two players.
 	#Add only the content of those clues to the temp table
 	#This will have to change when rainbow is added back in.
 	for ev in game.past_log:
-		if (ev.type == "Clue" and ev.touch and (ev.tgt == player.name or ev.tgt == other.name)):
-			for card in ev.touch:
-				if (ev.tgt == player.name and card in game.decks[player.name].deck):
-					if ev.color:
-						temptab.add_bit(Hanabit("confirmed","color",ev.color,"final",temptab),card)
-					elif ev.number:
-						temptab.add_bit(Hanabit("confirmed","number",ev.number,"final",temptab),card)		
-				if (ev.tgt == other.name and card in game.decks[other.name].deck):
-					if ev.color:
-						temptab.add_bit(Hanabit("confirmed","color",ev.color,"final",temptab),card)
-					elif ev.number:
-						temptab.add_bit(Hanabit("confirmed","number",ev.number,"final",temptab),card)
+		if (ev.type == "Clue" and (ev.tgt == player.name or ev.tgt == other.name)):
+			DeductionBot(game.variant).receive_clue(ev,temptab)
 	return temptab
 		
 def create_comp_tab(player):
