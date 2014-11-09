@@ -33,8 +33,6 @@ def create_all_choices(player,game):
 	
 def ikyk(game,player,other):
 	temptab = BitTable(game,pl=player)
-	# TODO: use tab.update_locations instead of manually making loc bits, then update critical,
-	# then call game.con.order_play_q and game.con.order_disc_q
 	temptab.update_location_list(game)
 	temptab.update_critical_list(game)
 	for card in game.play.deck:
@@ -65,25 +63,40 @@ def eval_flow(player,game):
 	# go through the hand. score playables, score others as discardable
 	for enum, c in enumerate(game.decks[player.name].deck):
 		if player.trike.tab[c].query_bit_pile(qtype=["confirmed","conventional"] 
-											  qquality=["playability"]
-											  qvalue=["playable"]):
+											  ,qquality=["playability"]
+											  ,qvalue=["playable"]
+											  ,qspin=["pos","final"]):
 			for i in chs:
-				if i.action == "Play" and i.pos == (player.handsize - enum):
+				if i.action == "Play" and i.pos == (len(game.decks[player.name].deck) - enum):
 					i.bump(10)
 		elif player.trike.tab[c].query_bit_pile(qtype=["default","conventional"] 
-											    qquality=["discardability"]
-											    qvalue=["discardable"]):
+											    ,qquality=["discardability"]
+											    ,qvalue=["discardable"]
+												,qspin=["default","pos","final"]):
 			for i in chs:
-				if i.action == "Discard" and i.pos == (player.handsize - enum):
-					i.bump(1 + clocks_are_low)
-	# evaluate clues based on amount of new info conveyed
+				if i.action == "Discard" and i.pos == (len(game.decks[player.name].deck) - enum):
+					qpos = i.tgt.trike.tab.discard_q.index(c)
+					i.bump(1 + len(i.tgt.trike.tab.discard_q) - qpos) 
+	# evaluate clues based on type of clue theyll think it is
 	for i in chs:
 		if i.action == "Clue":
-			baseline = ikyk(game,player,i.tgt)
-			baseline_count = baseline.bit_counter
-			game.bot.receive_clue(HanabiEvent(player,i.tgt,"Clue",None,i.color.i.number),baseline)
-			new_count = baseline.bit_counter
-			i.bump((new_count - baseline_count) - clocks_are_low)
+			pred = game.con.predict_clue(HanabiEvent(player,i.tgt,"Clue",None,i.color,i.number)
+			                             ,ikyk(game,player,i.tgt)
+										 ,game)
+			if pred == "playing":
+				i.bump(9)
+			elif pred == "bombing":
+				i.bump(-10)
+			elif pred == "protective":
+				i.bump(8)
+			elif pred == "dud":
+				i.bump(-10)
+			#these ones are just not implemented yet...
+			elif pred == "multi-play":
+				i.bump(-10)
+			elif pred == "stalling":
+				i.bump(-10)
+			
 	return chs.sort()
 	
 def create_comp_tab(player):
