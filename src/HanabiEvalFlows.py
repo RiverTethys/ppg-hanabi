@@ -69,7 +69,7 @@ def eval_flow(player,game):
 			for i in chs:
 				if i.action == "Play" and i.pos == (len(game.decks[player.name].deck) - enum):
 					i.bump(10)
-		elif player.trike.tab[c].query_bit_pile(qtype=["default","conventional"] 
+		elif player.trike.tab.list[c].query_bit_pile(qtype=["default","conventional"] 
 											    ,qquality=["discardability"]
 											    ,qvalue=["discardable"]
 												,qspin=["default","pos","final"]):
