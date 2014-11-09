@@ -75,8 +75,8 @@ def eval_flow(player,game):
 												,qspin=["default","pos","final"]):
 			for i in chs:
 				if i.action == "Discard" and i.pos == (len(game.decks[player.name].deck) - enum):
-					qpos = i.tgt.trike.tab.discard_q.index(c)
-					i.bump(1 + len(i.tgt.trike.tab.discard_q) - qpos) 
+					qpos = player.trike.tab.discard_q.index(c)
+					i.bump(1 + len(player.trike.tab.discard_q) - qpos) 
 	# evaluate clues based on type of clue theyll think it is
 	for i in chs:
 		if i.action == "Clue":
