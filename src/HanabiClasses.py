@@ -667,7 +667,7 @@ class Tricorder(object):
 	def update_table(self,game):
 		self.tab.update_location_list(game)
 		self.tab.update_positions(game)
-		self.table.update_critical_list()
+		self.tab.update_critical_list()
 		self.bot.update_playability(self.tab,game)
 		self.bot.update_discardability(self.tab)
 		self.bot.update_color(self.tab)
@@ -829,25 +829,25 @@ class BitTable(object):
 			#should only add bits with "final" spin when one isn't already there
 			if bit.spin == "final":
 				if tail.spin == "final":
-					print("Uh oh. This was already supposed to be final.")
+					print("{}: Uh oh. This was already supposed to be final.".format(self.name))
 					print(tail)
 					return
 				elif tail.spin == "neg":
-					print("Uh oh. This contradicts some final information.")
+					print("{}: Uh oh. This contradicts some final information.".format(self.name))
 					print(tail)
 					return
 				else:
-					print("It was already final that this card is {}.".format(bit.value))
+					print("{}: It was already final that this card is {}.".format(self.name,bit.value))
 					return
 			
 			if bit.type == "confirmed":
 				if tail.spin == "pos" and bit.spin == "neg":
-					print("Thought for a second that the card WAS {}  when in fact it was already NOT {}.".format(tail.value,bit.value))
+					print("{}: Thought for a second that the card WAS {}  when in fact it was already NOT {}.".format(self.name,tail.value,bit.value))
 					if tail.type == "inkling":
 						print("But it was just an inkling.")
 					return
 				elif tail.spin == "neg" and bit.spin == "pos":
-					print("Thought for a second that the card was NOT {}  when in fact it was already WAS {}.".format(tail.value,bit.value))
+					print("{}: Thought for a second that the card was NOT {}  when in fact it was already WAS {}.".format(self.name,tail.value,bit.value))
 					if tail.type == "inkling":
 						print("But it was just an inkling.")
 					return
@@ -857,14 +857,14 @@ class BitTable(object):
 							confirm_string = "IS"
 						elif tail.spin == "neg":
 							confirm_string = "is NOT"
-						print("Inkling already confirmed, this card {} {}.".format(confirm_string,tail.value))
+						print("{}: Inkling already confirmed, this card {} {}.".format(self.name,confirm_string,tail.value))
 						return
 					if tail.type == "confirmed":
 						if tail.spin == "pos":
 							confirm_string = "IS"
 						elif tail.spin == "neg":
 							confirm_string = "is NOT"
-						print("I already confirmed that this card {} {}.".format(confirm_string,tail.value))
+						print("{}: I already confirmed that this card {} {}.".format(self.name,confirm_string,tail.value))
 						return			
 		#DO WE NEED ANY MORE SAFTETIES HERE??
 		#Things like being rainbow when it's already negative for another color should be controlled by the game code/logic, not this mechanism
