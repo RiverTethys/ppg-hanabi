@@ -75,7 +75,7 @@ def eval_flow(player,game):
 												,qspin=["default","pos","final"]):
 			for i in chs:
 				if i.action == "Discard" and i.pos == (len(game.decks[player.name].deck) - enum):
-					for num, elt in player.trike.tab.discard_q:
+					for num, elt in enumerate(player.trike.tab.discard_q):
 						if elt == c:
 							qpos = num
 					i.bump(1 + len(player.trike.tab.discard_q) - qpos) 
