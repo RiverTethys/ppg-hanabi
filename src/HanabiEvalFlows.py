@@ -62,7 +62,7 @@ def eval_flow(player,game):
 	clocks_are_low = (game.MAX_CLOCKS/2) - game.clocks
 	# go through the hand. score playables, score others as discardable
 	for enum, c in enumerate(game.decks[player.name].deck):
-		if player.trike.tab[c].query_bit_pile(qtype=["confirmed","conventional"] 
+		if player.trike.tab.list[c].query_bit_pile(qtype=["confirmed","conventional"] 
 											  ,qquality=["playability"]
 											  ,qvalue=["playable"]
 											  ,qspin=["pos","final"]):
