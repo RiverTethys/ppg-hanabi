@@ -32,21 +32,22 @@ def create_all_choices(player,game):
 	return allc
 	
 def ikyk(game,player,other):
-	temptab = BitTable(game)
+	temptab = BitTable(game,pl=player)
+	# TODO: use tab.update_locations instead of manually making loc bits, then update critical,
+	# then call game.con.order_play_q and game.con.order_disc_q
+	temptab.update_location_list(game)
+	temptab.update_critical_list(game)
 	for card in game.play.deck:
 		temptab.add_bit(Hanabit("confirmed","color",card.color,"final",temptab),card)
 		temptab.add_bit(Hanabit("confirmed","number",card.number,"final",temptab),card)
-		temptab.add_bit(Hanabit("confirmed","location","Play","final",temptab),card)
 	for card in game.discard.deck:
 		temptab.add_bit(Hanabit("confirmed","color",card.color,"final",temptab),card)
 		temptab.add_bit(Hanabit("confirmed","number",card.number,"final",temptab),card)
-		temptab.add_bit(Hanabit("confirmed","location","Discard","final",temptab),card)
 	for pl in game.players:
 		for card in game.decks[pl.name].deck:
 			if (pl.name != player.name and pl.name != other.name):
 				temptab.add_bit(Hanabit("confirmed","color",card.color,"final",temptab),card)
 				temptab.add_bit(Hanabit("confirmed","number",card.number,"final",temptab),card)
-			temptab.add_bit(Hanabit("confirmed","location",pl.name,"final",temptab),card)
 	#Consult the log to find all clues given regarding 
 	#cards *currently* not visible to each of the two players.
 	#Add only the content of those clues to the temp table
@@ -54,8 +55,37 @@ def ikyk(game,player,other):
 	for ev in game.past_log:
 		if (ev.type == "Clue" and (ev.tgt == player.name or ev.tgt == other.name)):
 			DeductionBot(game.variant).receive_clue(ev,temptab)
+	game.con.order_play_q(temptab)
+	game.con.order_discard_q(temptab)
 	return temptab
-		
+
+def eval_flow(player,game):
+	chs = create_all_choices(player,game)
+	clocks_are_low = (game.MAX_CLOCKS/2) - game.clocks
+	# go through the hand. score playables, score others as discardable
+	for enum, c in enumerate(game.decks[player.name].deck):
+		if player.trike.tab[c].query_bit_pile(qtype=["confirmed","conventional"] 
+											  qquality=["playability"]
+											  qvalue=["playable"]):
+			for i in chs:
+				if i.action == "Play" and i.pos == (player.handsize - enum):
+					i.bump(10)
+		elif player.trike.tab[c].query_bit_pile(qtype=["default","conventional"] 
+											    qquality=["discardability"]
+											    qvalue=["discardable"]):
+			for i in chs:
+				if i.action == "Discard" and i.pos == (player.handsize - enum):
+					i.bump(1 + clocks_are_low)
+	# evaluate clues based on amount of new info conveyed
+	for i in chs:
+		if i.action == "Clue":
+			baseline = ikyk(game,player,i.tgt)
+			baseline_count = baseline.bit_counter
+			game.bot.receive_clue(HanabiEvent(player,i.tgt,"Clue",None,i.color.i.number),baseline)
+			new_count = baseline.bit_counter
+			i.bump((new_count - baseline_count) - clocks_are_low)
+	return chs.sort()
+	
 def create_comp_tab(player):
 	return deepcopy(player.trike.tab)
 	
