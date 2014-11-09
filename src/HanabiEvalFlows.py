@@ -108,3 +108,14 @@ def pos_to_card(player,pos):
 			return card
 	#convert a hand position into a card that can be 
 	#used to create an Event
+
+	
+	
+def event_from_choice(choice,player,game):
+	if choice.action != "Clue":
+		card_id = game.decks[player.name].deck[len(game.decks[player.name].deck)-choice.pos].id 	
+	else:
+		card_id = None
+		
+	return HanabiEvent(player,choice.tgt,choice.action,card_id,choice.color,choice.number)
+		

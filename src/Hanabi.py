@@ -139,7 +139,7 @@ def initialize_hanabi():  ##Separated so that we can test things more easily on 
 	bot = DeductionBot(variant)
 	player_name_list = ["Ted","Matthew"]
 	
-	SIM_DEPTH = 2
+	SIM_DEPTH = 0
 	game = HanabiGame("The Overworld",variant,[],bot,player_name_list,SIM_DEPTH,0)
 	
 	sim_name_list= []

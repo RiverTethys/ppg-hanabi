@@ -3,7 +3,7 @@
 #####################################################
 
 	
-
+from HanabiEvalFlows import *
 from HanabiDeductionFlows import *
 from HanabiConventionFlows import *
 
@@ -587,9 +587,7 @@ class HanabiNPC(Player):
 		Player.__init__(self,name,game)
 
 	def decision(self,game):
-		last_card = game.decks[self.name].deck[0]
-		event = HanabiEvent(self.name,None,"Discard",last_card.id,last_card.color,last_card.number)
-		return event
+		return event_from_choice(eval_flow(self,game),self,game)
 	
 	def analysis(self):
 		pass
