@@ -124,24 +124,38 @@ class HanabiConventions(object):
 	
 	
 	
-	def predict_clue(self,ev,table):
+	def predict_clue(self,ev,table,game):
 		#possible ways the clue could go.
 		possibilties = ["playing", "bombing", "protective","dud","multi-play","stalling"]
+		
+		ikyk_table = ikyk(game, ev.src, ev.tgt)
 		
 		
 		if (table.clued_cards(ev)):
 			indicated_card = self.newest(table.clued_cards(ev),table)
+		
+			self.bot.receive_clue(ev,ikyk_table)
+		
+		
+		
+			playable_cards = set([x for x in table.list if self.bot.playable(x,game)])
+			ikyk_possible_cards = set(self.bot.cards_that_can_be(indicated_card,ikyk_table))
 			
+			bombing_bool = (indicated_card not in playable_cards) and (ikyk_possible_cards & playable_cards) # (knowing the information the clue gives might lead the tgt to think the indicated card was playable)
+				
+			protective_bool = (ikyk_table.discard_q[0] in table.critical) # there's also a critical card that's about to be discarded
+		
 			if table.list[indicated_card].query_bit_pile(qtype=["confirmed"],qvalue=["playable"],qspin=["pos","final"]):
 				return "playing"
-			elif: # (knowing the information the clue gives might lead the tgt to think the indicated card was playable)
-				pass #then it would be a bombing clue
-			elif: # there's also a critical card that's about to be discarded
-				pass #then it would be a protective clue
+			elif bombing_bool: 
+				return "bombing"
+			elif protective_bool: 
+				return "protective"
 			
 		else: 
-			pass #this clue is possibly a dud... but with simulation predicitons we may see that non-clue clues allow plays to be made
+			pass #this clue is possibly a dud... but with simulation predictions we may see that non-clue clues allow plays to be made
 		
+		return "dud"
 	# playable_cards = set([x for x in table.list if self.playable(x,game)])
 		
 		# possible_cards = set(self.cards_that_can_be(card,table))
