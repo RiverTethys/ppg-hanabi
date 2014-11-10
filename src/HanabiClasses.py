@@ -1,5 +1,6 @@
 from collections import deque
 import random
+from copy import deepcopy
 
 class Card(object):
 	def __init__(self,id,color,number):
