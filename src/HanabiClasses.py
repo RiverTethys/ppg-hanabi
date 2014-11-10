@@ -370,7 +370,7 @@ def eval_flow(player,game):
 	# evaluate clues based on type of clue theyll think it is
 	for i in chs:
 		if i.action == "Clue":
-			pred = game.con.predict_clue(event_from_choice(i,player,game),ikyk(game,player,i.tgt),game)
+			pred = game.con.predict_clue(event_from_choice(i,player,game),ikyk(game,player.name,i.tgt),game)
 			if pred == "playing":
 				i.bump(9)
 			elif pred == "bombing":
