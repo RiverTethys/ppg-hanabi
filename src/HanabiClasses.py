@@ -525,59 +525,6 @@ class Player(object):
 				current_event.make_discard(self.name,d.id,d.color,d.number)
 				break
 		return current_event
-		
-class HanabiNPC(Player):
-	def __init__(self,name,game):
-		Player.__init__(self,name,game)
-
-	def decision(self,game):
-		return event_from_choice(eval_flow(self,game),self,game)
-	
-	def analysis(self):
-		pass
-	
-class HanabiSimNPC(HanabiNPC):
-	def __init__(self,name,game,N):
-		HanabiNPC.__init__(self,name,game)
-		self.depth = N
-		self.fref = ".\\{}depth{}.hanabidata".format(name,self.depth)
-	
-	def im_a_dummy(self):
-		if self.depth == game.total_depth:
-			return True
-		return False
-	
-	def im_with_stupid(self):
-		if self.depth == game.total_depth-1:
-			return True
-		return False
-	
-class HanabiSim(HanabiGame):
-	def __init__(self,name,game,sim_player_list,N):
-		game_copy = deepcopy(game)
-		self.deck_copy = deepcopy(game.initial_game_deck)
-		super(HanabiSim,self).__init__(name,game_copy.variant,game_copy.con,game.bot,sim_player_list,game_copy.total_depth,N)
-		
-	def add_player(self,dude):
-		self.players.append(dude)
-	
-	def set_game_deck(self):
-		self.add_card_list(HanabiGameDeck("card_list",self.variant, self.variant.decktemplate))
-		game_deck = self.deck_copy
-		initial_game_deck = deepcopy(game_deck)
-		self.add_initial_game_deck(initial_game_deck)
-		self.add_deck(game_deck)
-	
-	def initial_player_order(self,player_name_list):
-		player_list =[]
-		for name in player_name_list:
-			player_list.append(HanabiSimNPC(name,self,self.depth))
-
-		for i in range(len(player_list)):
-			self.add_player(player_list.pop(0)) #fed in in order of the real game
-		self.players_initial = deepcopy(self.players)
-		for dude in self.players:
-			dude.initialize_trike(self)
 	
 class Tricorder(object):
 	def __init__(self, game,player):
