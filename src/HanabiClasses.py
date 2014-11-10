@@ -318,8 +318,8 @@ def create_all_choices(player,game):
 	allc = p + d + c
 	return allc
 	
-def ikyk(game,player,other):
-	temptab = BitTable(game,pl=player)
+def ikyk(game,playername,other):
+	temptab = BitTable(game,pl=playername)
 	temptab.update_location_list(game)
 	temptab.update_critical_list()
 	for card in game.play.deck:
