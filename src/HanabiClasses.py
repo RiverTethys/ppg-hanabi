@@ -897,7 +897,7 @@ class BitTable(object):
 			self.name = pl.name
 		else:
 			self.name = "None"
-		self.list = {card: BitFolder(game,card) for card in game.decks["game_deck"].deck}
+		self.list = {card: BitFolder(game,card) for card in game.card_list.deck}
 		self.location = {location.name: {card: self.list[card] for card in location.deck} 
 		                                for deckname, location in game.decks.items()}
 		self.known = {card: self.list[card] for card in self.list if self.fixed(card)}
