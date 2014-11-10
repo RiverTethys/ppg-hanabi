@@ -579,13 +579,17 @@ class HanabiGame(object):
 		#Figure out whodunit...
 		for p in self.players:
 			if p.name == ev.src:
+				print("Found the player who is acting.")
 				# and make em do it.
 				if (ev.type == "Play" or ev.type == "Discard"):
+					print("Creating a tempcard.")
 					tempcard = Card(ev.id,ev.color,ev.number)
 					# Figure out which card in their hand is used
 					for card in self.decks[p.name].deck:
 						if (card == tempcard):
+							print("Found a matching card to play.")
 							if ev.type == "Play":
+								print("Attempting to play a card.")
 								if self.depth == 0:	
 									print("Attempting to play {}".format(tempcard))
 								self.play_card(card,p)	
