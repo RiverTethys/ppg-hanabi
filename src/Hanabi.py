@@ -50,7 +50,6 @@
 
 from HanabiConventionFlows import *
 from HanabiDeductionFlows import *
-from HanabiEvalFlows import *
 from HanabiClasses import *
 
 
