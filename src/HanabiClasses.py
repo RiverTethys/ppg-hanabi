@@ -406,7 +406,7 @@ def event_from_choice(choice,player,game):
 	else:
 		card_id = None
 		
-	return HanabiEvent(player,choice.tgt,choice.action,card_id,choice.color,choice.number)
+	return HanabiEvent(player.name,choice.tgt,choice.action,card_id,choice.color,choice.number)
 	
 class HanabiNPC(Player):
 	def __init__(self,name,game):
