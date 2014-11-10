@@ -256,6 +256,58 @@ class Player(object):
 				break
 		return current_event
 		
+class HanabiEvent(object):
+	def __init__(self,src,tgt,type,id,color,number):
+		self.src = src
+		self.tgt = tgt
+		self.type = type # "Play", "Discard", or "Clue"
+		self.id = id
+		self.color = color
+		self.number = number
+		self.touch = []
+		
+	def __repr__(self):
+		if (self.src == None):
+			repstr = "Null Hanabi event"
+		else:
+			repstr = "{} decided to {} ".format(self.src,self.type)
+			if (type == "Clue"):
+				repstr += "{}".format(self.tgt)
+				if (self.number != None):
+					repstr += " about {}'s.".format(self.number)
+				elif (self.color != None):
+					repstr += " about {}'s.".format(self.color)
+				else:
+					repstr += "... about what, we may never know."
+			else:
+				repstr += "{}{}.".format(self.number,self.color)
+		return repstr
+	
+	def make_clue(self,src,tgt,color,number):
+		self.src = src
+		self.tgt = tgt
+		self.type = "Clue"
+		self.color = color
+		self.number = number
+
+	def make_play(self,src,id,color,number):
+		self.src = src
+		self.type = "Play"
+		self.id = id
+		self.color = color
+		self.number = number
+
+	def make_discard(self,src,id,color,number):
+		self.src = src
+		self.type = "Discard"
+		self.id = id
+		self.color = color
+		self.number = number
+
+	def __init__(self,type,subtype,game):
+		self.type=type
+		self.subtype=subtype
+
 def create_all_choices(player,game):
 	allc = []
 	#Create plays and discards
@@ -1134,55 +1186,3 @@ class Hanabit(object): # a single piece of information
 		
 		# #what else do we need here?
 		# return
-
-class HanabiEvent(object):
-	def __init__(self,src,tgt,type,id,color,number):
-		self.src = src
-		self.tgt = tgt
-		self.type = type # "Play", "Discard", or "Clue"
-		self.id = id
-		self.color = color
-		self.number = number
-		self.touch = []
-		
-	def __repr__(self):
-		if (self.src == None):
-			repstr = "Null Hanabi event"
-		else:
-			repstr = "{} decided to {} ".format(self.src,self.type)
-			if (type == "Clue"):
-				repstr += "{}".format(self.tgt)
-				if (self.number != None):
-					repstr += " about {}'s.".format(self.number)
-				elif (self.color != None):
-					repstr += " about {}'s.".format(self.color)
-				else:
-					repstr += "... about what, we may never know."
-			else:
-				repstr += "{}{}.".format(self.number,self.color)
-		return repstr
-	
-	def make_clue(self,src,tgt,color,number):
-		self.src = src
-		self.tgt = tgt
-		self.type = "Clue"
-		self.color = color
-		self.number = number
-
-	def make_play(self,src,id,color,number):
-		self.src = src
-		self.type = "Play"
-		self.id = id
-		self.color = color
-		self.number = number
-
-	def make_discard(self,src,id,color,number):
-		self.src = src
-		self.type = "Discard"
-		self.id = id
-		self.color = color
-		self.number = number
-
-	def __init__(self,type,subtype,game):
-		self.type=type
-		self.subtype=subtype
