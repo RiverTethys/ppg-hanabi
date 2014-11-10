@@ -1,3 +1,4 @@
+from HanabiClasses import *
 from copy import deepcopy
 
 def main_flow(player,game):
@@ -253,101 +254,6 @@ class DeductionBot(object):
 	def interpret_clue(self,ev):
 		pass
 
-		
-class Hanabit(object): # a single piece of information
-	def __init__(self,knowledgeType,quality,value,spin,tab):
-		self.tab = tab
-		self.id = tab.bit_counter
-		self.type = knowledgeType #confirmed,inkling,etc.
-		self.quality = quality #color,number,protected, playable, discardable, etc.
-		self.value = value #'R',3,True,etc.
-		self.spin = spin #pos,neg,final (it is this thing to the exclusion of all others)	
-		
-	def __repr__(self):
-		if self.quality == "location":
-			output_str = self.quality[0:3]+":"+self.value
-		elif self.quality == "number" or self.quality == "color":
-			output_str = self.type[0:1].upper()+self.spin[0:1].upper()+" "+str(self.value)
-		else:
-			type_str = self.type[0:1].upper()
-			quality_str = self.quality[0:3]
-			value_str = str(self.value)
-			spin_str = self.spin[0:1].upper()
-			output_str = type_str+spin_str+" "+quality_str+":"+value_str
-		return output_str		
-	
-	def __eq__(self,other):
-		return (self.type == other.type and self.quality == other.quality and self.value == other.value and self.spin==other.spin)
-	
-	def __hash__(self):
-		return hash((self.tab,self.id))	
-# def all_known(self,value,table):
-	# if value in self.decktemplate.colors:
-		# value_list = {card:table.list[card] for card in table.list if card.color == value}
-	# if value in self.decktemplate.numbers:
-		# value_list = {card:table.list[card] for card in table.list if card.num == value}
-	# for card in value_list:
-		# if card not in table.known:
-			# return False
-	# return True
-			
-			
-# def deduce_colors(self,game): ###  RAINBOW EDITION
-	# for card in self.hand.c:
-		# #Check if this is already done
-		# for color in card.bits["color"]:
-				# for bit in card.bits["color"][color]:
-					# if bit.spin == "final" and bit.type == "confirmed":
-						# continue
-		# #If there is confirmed multiple color info, then it must be rainbow
-		# if self.count_bits(self,card,"confirmed","color","any","pos") > 2:
-			# Hbit=Hanabit("confirmed","color","H","final")
-			# self.add_bit(HBit,card)
-			# continue 
-		# #If there is confirmed single color info, then rainbow has been eliminated and that info must be final.
-		# if self.count_bits(self,card,"confirmed","color","any","pos") == 1:
-			# for color in card.bits["color"]:
-				# for bit in card.bits["color"][color]:
-					# if bit.type == "confirmed":
-						# Cbit = Hanabit("confirmed","color",bit.value,"final")
-						# self.add_bit(CBit,card)
-						# continue
-		# #We can also deduce color by stacking negative information
-		# color_set = set(deepcopy(game.colors))
-		# #Continuing with this, we can also check to see what cards it cannot be given visible cards
-		
-		# #what else do we need here?
-		# return
-					
-			
-# class BitFolder(object):
-	# def __init__(self,game,card):
-		# self.qualities = ["color","num"]
-		# self.values = {"color":game.colors,"num":game.numbers}
-		# self.folder = {quality:{value:[] for value in self.values[quality]} for quality in self.qualities}		
-
-		
-# class BitTable(object):
-	# def __init__(self,game):  #May want to use id's for some of this?
-		# self.list = {card: BitFolder(game,card) for card in game.card_list}
-		# self.location = {location.name: {card: self.list[card] for card in location.deck} for location in game.decks}
-		# visible_cards = {}
-		# #figure out self.visible
-		# self.critical = {card: self.list[card]  for card in self. if self.only_one(card)}
-		# #and other pre-organized list of bit folders
-	# def only_one(self,card):
-		# pass
-	# def update_all_lists(self):
-		# pass
-	# def update_critical(self):
-		# pass
-	# def update_location(self):
-		# pass
-	# def update_short_list(self,short_list,criteria):
-		# pass
-	# def make_short_list(self,criteria):
-		# pass
-		
 				
 
 

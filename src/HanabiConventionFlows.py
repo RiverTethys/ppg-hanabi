@@ -4,6 +4,7 @@
 
 
 from HanabiDeductionFlows import *
+from HanabiClasses import *
 
 class HanabiConventions(object):
 	def __init__(self,game):

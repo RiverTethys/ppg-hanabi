@@ -1,12 +1,3 @@
-
-
-#####################################################
-
-	
-from HanabiEvalFlows import *
-from HanabiDeductionFlows import *
-from HanabiConventionFlows import *
-
 from collections import deque
 import random
 
@@ -746,6 +737,347 @@ class BitFolder(object):
 class HanabiList(object):
 	def __init__(self): #The thought here is to make counting and short_list assembly cleaner
 		pass
+		
+class BitTable(object):
+	def __init__(self,game,pl=None):  #May want to use id's for some of this?
+		self.decktemplate = game.variant.decktemplate
+		if pl:
+			self.name = pl.name
+		else:
+			self.name = "None"
+		self.list = {card: BitFolder(game,card) for card in game.decks["game_deck"].deck}
+		self.location = {location.name: {card: self.list[card] for card in location.deck} 
+		                                for deckname, location in game.decks.items()}
+		self.known = {card: self.list[card] for card in self.list if self.fixed(card)}
+		self.critical = {card: self.list[card]  for card in self.list if (self.only_one(card.color,card.number) and not self.gone(card))}
+		self.play_q = deque([])
+		if pl:
+			self.discard_q = deque(deepcopy(game.decks[pl.name].deck))
+		else:
+			self.discard_q = deque([])
+		#and other pre-organized lists of bit folders
+		self.bit_counter = 0
+	
+	def inc_bit_counter(self):
+		self.bit_counter += 1
+		
+	
+	def add_bit(self,tail,card): #pin the tail to a card in the table	
+		#only adds it if it isn't contradicted or made redundant by a confirmed bit
+		x = self.list[card]
+		folder = x.folder
+		for bit in folder[tail.quality][tail.value]:
+			#should only add bits with "final" spin when one isn't already there
+			if bit.spin == "final":
+				if tail.spin == "final":
+					print("{}: Uh oh. This was already supposed to be final.".format(self.name))
+					print(tail)
+					return
+				elif tail.spin == "neg":
+					print("{}: Uh oh. This contradicts some final information.".format(self.name))
+					print(tail)
+					return
+				else:
+					print("{}: It was already final that this card is {}.".format(self.name,bit.value))
+					return
+			
+			if bit.type == "confirmed":
+				if tail.spin == "pos" and bit.spin == "neg":
+					print("{}: Thought for a second that the card WAS {}  when in fact it was already NOT {}.".format(self.name,tail.value,bit.value))
+					if tail.type == "inkling":
+						print("But it was just an inkling.")
+					return
+				elif tail.spin == "neg" and bit.spin == "pos":
+					print("{}: Thought for a second that the card was NOT {}  when in fact it was already WAS {}.".format(self.name,tail.value,bit.value))
+					if tail.type == "inkling":
+						print("But it was just an inkling.")
+					return
+				elif tail.spin == bit.spin:
+					if tail.type == "inkling":
+						if tail.spin == "pos":
+							confirm_string = "IS"
+						elif tail.spin == "neg":
+							confirm_string = "is NOT"
+						print("{}: Inkling already confirmed, this card {} {}.".format(self.name,confirm_string,tail.value))
+						return
+					if tail.type == "confirmed":
+						if tail.spin == "pos":
+							confirm_string = "IS"
+						elif tail.spin == "neg":
+							confirm_string = "is NOT"
+						print("{}: I already confirmed that this card {} {}.".format(self.name,confirm_string,tail.value))
+						return			
+		#DO WE NEED ANY MORE SAFTETIES HERE??
+		#Things like being rainbow when it's already negative for another color should be controlled by the game code/logic, not this mechanism
+		#By now we feel safe to append, but first we: 
+		#remove bits that are conflicting or redundant and less convincing
+		if tail.spin == "final": #no other information about that quality is relevant
+			x.clear(cquality = tail.quality)
+		elif tail.type == "confirmed": #get rid of all inklings of the same value (more sophisticated things will have to be handled by deductions)
+			x.clear(ctype ="inkling",cvalue = tail.value)
+		x.add_bit(tail)
+		self.inc_bit_counter()
+	
+	def gone(self,card):
+		return (card in self.location["Play"] or card in self.location["Discard"])
+	
+	def dead(self,card):
+		card_match = set([x for x in self.list if x.color==card.color and x.number==card.number])
+		discarded_cards = set([x for x in self.location["Discard"]])
+		return (card_match <= discarded_cards)
+	
+	def final(self,card,quality):
+		for bit in self.list[card].quality_pile[quality]:
+			if bit.type=="confirmed" and bit.spin == "final":
+				return True
+		return False
+
+	def clued_cards(self,ev):
+		if (ev.color):
+			card_list = [card for card in self.location[ev.tgt] if card.color == ev.color]
+		if (ev.number):
+			card_list = [card for card in self.location[ev.tgt] if card.number == ev.number]
+		return card_list
+	
+	def played(self,card):
+		card_match = set([x for x in self.list if x.color==card.color and x.number==card.number])
+		played_cards = set([x for x in self.location["Play"]])
+		intersection = card_match & played_cards
+		return (len(intersection)==1)
+	
+	def only_one(self,color,number):  #Needs embellishment, perhaps.  Might be the case that there are zero left.
+		total = self.decktemplate.distr[color][number]
+		gone_list = [card for card in self.list if (self.gone(card) and card.color == color and card.number == number)]
+		number_left = total - len(gone_list)
+		if number_left == 1:
+			return True
+		if number_left == 0:
+			print("Just asked if a card that's already gone is the only_one.  You might want to change the list you loop over.")
+		return False		
+	
+	
+	def fixed(self,card):
+		for bit in self.list[card].pile:
+			if bit.spin == "final" and bit.quality == "color":
+				for bit in self.list[card].pile:
+					if bit.spin == "final" and bit.quality == "number":
+						return True
+		return False
+		
+	
+	def new_position(self,card,player_name,game):	
+		self.list[card].clear(cquality = "position")
+		position = game.variant.handsize - game.decks[player_name].deck.index(card)
+		Posbit = Hanabit("confirmed","position",position,"final",self)
+		self.add_bit(Posbit,card)
+		
+	def update_positions(self,game):
+		for card in self.list:
+			in_some_hand = False
+			for p in game.players:
+				if card in self.location[p.name]:
+					in_some_hand = True
+					self.new_position(card,p.name,game)
+			if (not in_some_hand):
+				if self.list[card].query_bit_pile(qquality = ["position"], qspin = ["final"]):
+					self.list[card].clear(cquality = "position")
+			
+			
+	
+	def new_location(self,card,location_name,game):
+		if card in self.location[self.name]: #should already be done when card is played/discarded, but just in case
+			if card in self.discard_q:
+				self.discard_q.remove(card)
+			if card in self.play_q:
+				self.play_q.remove(card)
+		self.list[card].clear(cquality = "location")
+		Lbit = Hanabit("confirmed","location",location_name,"final",self)
+		self.add_bit(Lbit,card)
+		self.update_location_list(game)
+		if location_name == self.name:
+			if card not in self.discard_q:
+				self.discard_q.append(card)	
+			self.add_bit(Hanabit("default","discardability","discardable","default",self),card)
+	
+	def update_location_list(self,game):
+		self.location = {location.name: {card: self.list[card] for card in location.deck} 
+		                                for deckname, location in game.decks.items()}
+	
+	def update_critical_list(self):
+		self.critical = {card: self.list[card]  for card in self.list if (self.only_one(card.color,card.number) and not self.gone(card))}
+	
+	def new_visible(self,card,location,game):
+		if not self.final(card,"color"):
+			color_bit = Hanabit("confirmed","color",card.color,"final",self)
+			self.add_bit(color_bit,card)
+		if not self.final(card,"number"):
+			number_bit = Hanabit("confirmed","number",card.number,"final",self)
+			self.add_bit(number_bit,card)
+		self.new_location(card,location,game)
+	
+	def update_all_lists(self,game):
+		self.update_location_list(game)
+		self.update_critical_list()
+		
+	
+
+	
+	def make_short_list(self,type,quality,value,spin): #works like the make_pile in BitFolder
+		temp_dict = {}
+		for card in self.list:
+			pile = self.list[card].pile
+			for bit in pile:
+				bool_type = bit.type in type or 1 in type
+				bool_quality = bit.quality in quality or 1 in quality
+				bool_value = bit.value in value or 1 in value
+				bool_spin = bit.spin in spin or 1 in spin
+				if (bool_type and bool_quality and bool_value and bool_spin):
+					temp_dict[card] = self.list[card]
+					break
+		return temp_dict		
+	#def make_short_dict(self,type,quality,value,spin,indices): #for cooler looping maybe someday
+	
+		
+	def read_deck(self,name):
+		pass		
+		
+	def tag(self,thing,type,quality,value,spin): 
+		bit = Hanabit(type,quality,value,spin,self)
+		self.list[thing].folder[quality][value].append(bit)
+
+	def edit_bits(self):
+		pass
+
+	def update_knowledge(self):
+		pass
+
+class Choice(object):
+	def __init__(self,action=None,tgt=None,color=None,number=None,pos=None):
+		self.action = action
+		self.tgt = tgt
+		self.color = color
+		self.number = number
+		self.pos = pos
+		self.score = 0
+		
+	def __lt__(self,other):
+		return self.score < other.score
+		
+	def bump(self,by):
+		self.score = self.score + by		
+
+class Hanabit(object): # a single piece of information
+	def __init__(self,knowledgeType,quality,value,spin,tab):
+		self.tab = tab
+		self.id = tab.bit_counter
+		self.type = knowledgeType #confirmed,inkling,etc.
+		self.quality = quality #color,number,protected, playable, discardable, etc.
+		self.value = value #'R',3,True,etc.
+		self.spin = spin #pos,neg,final (it is this thing to the exclusion of all others)	
+		
+	def __repr__(self):
+		if self.quality == "location":
+			output_str = self.quality[0:3]+":"+self.value
+		elif self.quality == "number" or self.quality == "color":
+			output_str = self.type[0:1].upper()+self.spin[0:1].upper()+" "+str(self.value)
+		else:
+			type_str = self.type[0:1].upper()
+			quality_str = self.quality[0:3]
+			value_str = str(self.value)
+			spin_str = self.spin[0:1].upper()
+			output_str = type_str+spin_str+" "+quality_str+":"+value_str
+		return output_str		
+	
+	def __eq__(self,other):
+		return (self.type == other.type and self.quality == other.quality and self.value == other.value and self.spin==other.spin)
+	
+	def __hash__(self):
+		return hash((self.tab,self.id))	
+# def all_known(self,value,table):
+	# if value in self.decktemplate.colors:
+		# value_list = {card:table.list[card] for card in table.list if card.color == value}
+	# if value in self.decktemplate.numbers:
+		# value_list = {card:table.list[card] for card in table.list if card.num == value}
+	# for card in value_list:
+		# if card not in table.known:
+			# return False
+	# return True
+			
+			
+# def deduce_colors(self,game): ###  RAINBOW EDITION
+	# for card in self.hand.c:
+		# #Check if this is already done
+		# for color in card.bits["color"]:
+				# for bit in card.bits["color"][color]:
+					# if bit.spin == "final" and bit.type == "confirmed":
+						# continue
+		# #If there is confirmed multiple color info, then it must be rainbow
+		# if self.count_bits(self,card,"confirmed","color","any","pos") > 2:
+			# Hbit=Hanabit("confirmed","color","H","final")
+			# self.add_bit(HBit,card)
+			# continue 
+		# #If there is confirmed single color info, then rainbow has been eliminated and that info must be final.
+		# if self.count_bits(self,card,"confirmed","color","any","pos") == 1:
+			# for color in card.bits["color"]:
+				# for bit in card.bits["color"][color]:
+					# if bit.type == "confirmed":
+						# Cbit = Hanabit("confirmed","color",bit.value,"final")
+						# self.add_bit(CBit,card)
+						# continue
+		# #We can also deduce color by stacking negative information
+		# color_set = set(deepcopy(game.colors))
+		# #Continuing with this, we can also check to see what cards it cannot be given visible cards
+		
+		# #what else do we need here?
+		# return
+
+class HanabiEvent(object):
+	def __init__(self,src,tgt,type,id,color,number):
+		self.src = src
+		self.tgt = tgt
+		self.type = type # "Play", "Discard", or "Clue"
+		self.id = id
+		self.color = color
+		self.number = number
+		self.touch = []
+		
+	def __repr__(self):
+		if (self.src == None):
+			repstr = "Null Hanabi event"
+		else:
+			repstr = "{} decided to {} ".format(self.src,self.type)
+			if (type == "Clue"):
+				repstr += "{}".format(self.tgt)
+				if (self.number != None):
+					repstr += " about {}'s.".format(self.number)
+				elif (self.color != None):
+					repstr += " about {}'s.".format(self.color)
+				else:
+					repstr += "... about what, we may never know."
+			else:
+				repstr += "{}{}.".format(self.number,self.color)
+		return repstr
+	
+	def make_clue(self,src,tgt,color,number):
+		self.src = src
+		self.tgt = tgt
+		self.type = "Clue"
+		self.color = color
+		self.number = number
+
+	def make_play(self,src,id,color,number):
+		self.src = src
+		self.type = "Play"
+		self.id = id
+		self.color = color
+		self.number = number
+
+	def make_discard(self,src,id,color,number):
+		self.src = src
+		self.type = "Discard"
+		self.id = id
+		self.color = color
+		self.number = number
 		
 
 #FROM HERE ON, WE HAVE AI STUFFY STUFF

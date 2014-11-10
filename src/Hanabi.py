@@ -48,6 +48,9 @@
 
 #Not 100% sure if Events are going to be used for AI planning, but if they are, we may need some way to track 'intent' (e.g. protective clues, versus playing clues). Right now I'm attempting to use them (that is, the list of possible actions is actually a list of events)
 
+from HanabiConventionFlows import *
+from HanabiDeductionFlows import *
+from HanabiEvalFlows import *
 from HanabiClasses import *
 
 
