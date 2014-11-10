@@ -129,6 +129,7 @@ class HanabiDeckTemplate(object):
 		return size
 
 class HanabiVariant(object):
+
 	def __init__(self,playernum,handsize,decktemplate,rules):
 		self.playernum = playernum
 		self.handsize = handsize
@@ -140,6 +141,121 @@ class HanabiVariant(object):
 		self.handtemplate = HanabiDeckTemplate(decktemplate.colors,decktemplate.numbers,{x:{y:0 for y in decktemplate.numbers} for x in decktemplate.colors})
 		self.stackstemplate = HanabiDeckTemplate(decktemplate.colors,decktemplate.numbers,{x:{y:0 for y in decktemplate.numbers} for x in decktemplate.colors})
 		self.rules = rules
+
+class Player(object):
+	def __init__(self,name,game):
+		self.name = name
+		x = HanabiHand(name,game.variant,game.variant.handtemplate)
+		game.add_deck(x)
+		self.fref = ".\\{}.hanabidata".format(name)
+		self.depth = 0
+		self.trike = []
+	
+	def __repr__(self):
+		return self.name
+	
+	def initialize_trike(self,game):
+		self.trike = Tricorder(game,self)
+	
+	def draw(self,game,deck):
+		card = game.draw_card(deck)
+		game.decks[self.name].deck.append(card)
+		#update tables
+		for dude in game.players:
+			dude.trike.tab.new_location(card,self.name,game)
+			if dude.name != self.name:
+				dude.trike.tab.new_visible(card,self.name,game)
+		
+	# deprecated. i want it to break if something is still calling these.
+	# def discard(self,game,pos,deck):
+		# d = game.decks[self.name].deck[-pos]
+		# color = game.decks[self.name].deck[-pos].color
+		# game.discard_card(game.decks[self.name].deck.pop(-pos))
+		# self.draw(game,deck)
+		# return d
+		
+		
+	# def play(self,game,pos,deck):
+		# a=game.decks[self.name].deck[-pos]	
+		# color = a.color
+		# game.play_card(game.decks[self.name].deck.pop(-pos))
+		# self.draw(game,deck)
+		# return a
+	
+		
+	#def clue(self,player,clue):
+	#	pass
+	
+	def decision(self,game):
+		current_event = game.future_log.popleft()
+		while(True):
+			print("Which action happens this turn? ")
+			if (game.clocks > 0):
+				action = input("Clue = c / plAy = a / Discard = d\n")
+			else:
+				action = input("plAy = a / Discard = d\n")
+				
+			if (action=='c' or action=='C'):
+				if (game.clocks < 1):
+					print("     ***You don't have any clocks left!***\n")
+				else:
+					#build clue target options
+					if (len(game.players) > 2):
+						i = 1
+						print ("Who do you want to clue?\n")
+						for dude in game.players:
+							if (dude.name != self.name):
+								print ("{}. {}\n".format(i,dude.name))
+								i += 1
+						selection = int(input(" "))
+						tgt = game.players[selection]
+					else:
+						tgt = game.players[1]
+						
+					#build clue content options
+					print("\nWhat clue do you want to give?")
+					possible_colors = set(game.colors) - set("H")
+					possible_numbers = set(game.numbers)
+					# We dont display allowed clues because technically you
+					# can clue about having 0 of something
+					# print("\nColors: ")
+					# for color in possible_colors:
+						# print("{} ".format(color))
+					# print("\nNumbers: ")
+					# for number in possible_numbers:
+						# print("{} ".format(number))
+
+						
+					# dont need to call game.action because the return value
+					# is being used in a call to it at the top level
+					while True:
+						try:
+							clue_choice = input("\n")
+							if clue_choice.upper() in possible_colors:
+								current_event.make_clue(self.name,tgt.name,clue_choice.upper(),None)
+								break
+							elif int(clue_choice) in possible_numbers:
+								current_event.make_clue(self.name,tgt.name,None,int(clue_choice))
+								break
+							else:
+								print("That's not a valid clue choice.\n")
+						except AttributeError:
+							print("That's not a valid clue choice.\n")
+						except ValueError:
+							print("That's not a valid clue choice.\n")
+					break
+					
+			elif (action=='a' or action=='A'):
+				a = game.decks[self.name].deck[-int(input("Which card? 1=newest,{}=oldest\n".format(game.variant.handsize)))]
+				current_event.make_play(self.name,a.id,a.color,a.number)
+				break
+				
+			elif (action=='d' or action=='D'):
+				d = game.decks[self.name].deck[-int(input("Which card? 1=newest,{}=oldest\n".format(game.variant.handsize)))]
+				current_event.make_discard(self.name,d.id,d.color,d.number)
+				break
+		return current_event
+		
 def create_all_choices(player,game):
 	allc = []
 	#Create plays and discards
@@ -565,120 +681,6 @@ class HanabiGame(object):
 			print(self.discard)
 		for dude in self.players:
 			self.write_state(dude)
-	
-class Player(object):
-	def __init__(self,name,game):
-		self.name = name
-		x = HanabiHand(name,game.variant,game.variant.handtemplate)
-		game.add_deck(x)
-		self.fref = ".\\{}.hanabidata".format(name)
-		self.depth = 0
-		self.trike = []
-	
-	def __repr__(self):
-		return self.name
-	
-	def initialize_trike(self,game):
-		self.trike = Tricorder(game,self)
-	
-	def draw(self,game,deck):
-		card = game.draw_card(deck)
-		game.decks[self.name].deck.append(card)
-		#update tables
-		for dude in game.players:
-			dude.trike.tab.new_location(card,self.name,game)
-			if dude.name != self.name:
-				dude.trike.tab.new_visible(card,self.name,game)
-		
-	# deprecated. i want it to break if something is still calling these.
-	# def discard(self,game,pos,deck):
-		# d = game.decks[self.name].deck[-pos]
-		# color = game.decks[self.name].deck[-pos].color
-		# game.discard_card(game.decks[self.name].deck.pop(-pos))
-		# self.draw(game,deck)
-		# return d
-		
-		
-	# def play(self,game,pos,deck):
-		# a=game.decks[self.name].deck[-pos]	
-		# color = a.color
-		# game.play_card(game.decks[self.name].deck.pop(-pos))
-		# self.draw(game,deck)
-		# return a
-	
-		
-	#def clue(self,player,clue):
-	#	pass
-	
-	def decision(self,game):
-		current_event = game.future_log.popleft()
-		while(True):
-			print("Which action happens this turn? ")
-			if (game.clocks > 0):
-				action = input("Clue = c / plAy = a / Discard = d\n")
-			else:
-				action = input("plAy = a / Discard = d\n")
-				
-			if (action=='c' or action=='C'):
-				if (game.clocks < 1):
-					print("     ***You don't have any clocks left!***\n")
-				else:
-					#build clue target options
-					if (len(game.players) > 2):
-						i = 1
-						print ("Who do you want to clue?\n")
-						for dude in game.players:
-							if (dude.name != self.name):
-								print ("{}. {}\n".format(i,dude.name))
-								i += 1
-						selection = int(input(" "))
-						tgt = game.players[selection]
-					else:
-						tgt = game.players[1]
-						
-					#build clue content options
-					print("\nWhat clue do you want to give?")
-					possible_colors = set(game.colors) - set("H")
-					possible_numbers = set(game.numbers)
-					# We dont display allowed clues because technically you
-					# can clue about having 0 of something
-					# print("\nColors: ")
-					# for color in possible_colors:
-						# print("{} ".format(color))
-					# print("\nNumbers: ")
-					# for number in possible_numbers:
-						# print("{} ".format(number))
-
-						
-					# dont need to call game.action because the return value
-					# is being used in a call to it at the top level
-					while True:
-						try:
-							clue_choice = input("\n")
-							if clue_choice.upper() in possible_colors:
-								current_event.make_clue(self.name,tgt.name,clue_choice.upper(),None)
-								break
-							elif int(clue_choice) in possible_numbers:
-								current_event.make_clue(self.name,tgt.name,None,int(clue_choice))
-								break
-							else:
-								print("That's not a valid clue choice.\n")
-						except AttributeError:
-							print("That's not a valid clue choice.\n")
-						except ValueError:
-							print("That's not a valid clue choice.\n")
-					break
-					
-			elif (action=='a' or action=='A'):
-				a = game.decks[self.name].deck[-int(input("Which card? 1=newest,{}=oldest\n".format(game.variant.handsize)))]
-				current_event.make_play(self.name,a.id,a.color,a.number)
-				break
-				
-			elif (action=='d' or action=='D'):
-				d = game.decks[self.name].deck[-int(input("Which card? 1=newest,{}=oldest\n".format(game.variant.handsize)))]
-				current_event.make_discard(self.name,d.id,d.color,d.number)
-				break
-		return current_event
 	
 class Tricorder(object):
 	def __init__(self, game,player):
