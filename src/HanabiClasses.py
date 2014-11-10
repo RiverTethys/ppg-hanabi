@@ -321,7 +321,7 @@ def create_all_choices(player,game):
 def ikyk(game,player,other):
 	temptab = BitTable(game,pl=player)
 	temptab.update_location_list(game)
-	temptab.update_critical_list(game)
+	temptab.update_critical_list()
 	for card in game.play.deck:
 		temptab.add_bit(Hanabit("confirmed","color",card.color,"final",temptab),card)
 		temptab.add_bit(Hanabit("confirmed","number",card.number,"final",temptab),card)
