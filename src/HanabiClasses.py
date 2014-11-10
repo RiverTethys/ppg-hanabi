@@ -338,7 +338,7 @@ def ikyk(game,playername,other):
 	#Add only the content of those clues to the temp table
 	#This will have to change when rainbow is added back in.
 	for ev in game.past_log:
-		if (ev.type == "Clue" and (ev.tgt == player or ev.tgt == other)):
+		if (ev.type == "Clue" and (ev.tgt == playername or ev.tgt == other)):
 			game.bot.receive_clue(ev,temptab)
 	game.con.order_play_q(temptab)
 	game.con.order_discard_q(temptab)
