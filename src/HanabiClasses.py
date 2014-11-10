@@ -304,10 +304,6 @@ class HanabiEvent(object):
 		self.color = color
 		self.number = number
 
-	def __init__(self,type,subtype,game):
-		self.type=type
-		self.subtype=subtype
-
 def create_all_choices(player,game):
 	allc = []
 	#Create plays and discards
