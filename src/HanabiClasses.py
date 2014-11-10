@@ -330,7 +330,7 @@ def ikyk(game,player,other):
 		temptab.add_bit(Hanabit("confirmed","number",card.number,"final",temptab),card)
 	for pl in game.players:
 		for card in game.decks[pl.name].deck:
-			if (pl != player.name and pl != other.name):
+			if (pl.name != player and pl.name != other):
 				temptab.add_bit(Hanabit("confirmed","color",card.color,"final",temptab),card)
 				temptab.add_bit(Hanabit("confirmed","number",card.number,"final",temptab),card)
 	#Consult the log to find all clues given regarding 
@@ -338,7 +338,7 @@ def ikyk(game,player,other):
 	#Add only the content of those clues to the temp table
 	#This will have to change when rainbow is added back in.
 	for ev in game.past_log:
-		if (ev.type == "Clue" and (ev.tgt == player.name or ev.tgt == other.name)):
+		if (ev.type == "Clue" and (ev.tgt == player or ev.tgt == other)):
 			DeductionBot(game.variant).receive_clue(ev,temptab)
 	game.con.order_play_q(temptab)
 	game.con.order_discard_q(temptab)
