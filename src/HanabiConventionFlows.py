@@ -9,7 +9,8 @@ class HanabiConventions(object):
 	def __init__(self,game):
 		self.bot = game.bot
 
-	def oldest(self,card_list,table): #returns card in oldest position from a list of cards, a subset of someone's hand
+	def oldest(self,card_list,table,game): #returns card in oldest position from a list of cards, a subset of someone's hand
+		table.update_positions(game)
 		positions = []
 		position_dict = {}
 		for card in card_list:
@@ -19,10 +20,13 @@ class HanabiConventions(object):
 		positions.sort()
 		return position_dict[positions[-1]]
 						
-	def newest(self,card_list,table): #returns the newest card from a subset of a hand
+	def newest(self,card_list,table,game): #returns the newest card from a subset of a hand
+		table.update_positions(game)
 		positions = []
 		position_dict = {}
 		for card in card_list:
+			print(table.name)
+			print(table.list[card].quality_pile["position"])
 			for bit in table.list[card].quality_pile["position"]:
 				positions.append(bit.value)
 				position_dict[bit.value] = card
@@ -132,7 +136,7 @@ class HanabiConventions(object):
 		
 		
 		if (table.clued_cards(ev)):
-			indicated_card = self.newest(table.clued_cards(ev),table)
+			indicated_card = self.newest(table.clued_cards(ev),table,game)
 		
 			self.bot.receive_clue(ev,ikyk_table)
 		
@@ -170,7 +174,7 @@ class HanabiConventions(object):
 		multi_play = False #ohgodohgodohgod
 		
 		if (table.clued_cards(ev)):
-			indicated_card = self.newest(table.clued_cards(ev),table)
+			indicated_card = self.newest(table.clued_cards(ev),table,game)
 		
 		### could make room for stalling and multi_play
 		
@@ -187,7 +191,7 @@ class HanabiConventions(object):
 			table.add_bit(Ibit,protected_card)		
 	
 		if(playing):
-			playable_card = self.newest(table.clued_cards(ev),table)
+			playable_card = self.newest(table.clued_cards(ev),table,game)
 			Ibit = Hanabit("conventional","playability","playable","pos",table)
 			table.add_bit(Ibit,indicated_card)
 			if indicated_card in table.play_q:

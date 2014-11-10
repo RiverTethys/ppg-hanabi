@@ -1,6 +1,7 @@
 from copy import deepcopy
 from HanabiDeductionFlows import *
 from HanabiConventionFlows import *
+from HanabiClasses import *
 
 class HanabiEvent(object):
 	def __init__(self,src,tgt,type,id,color,number):
