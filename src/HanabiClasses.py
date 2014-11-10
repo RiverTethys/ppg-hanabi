@@ -400,9 +400,9 @@ def pos_to_card(player,pos):
 def event_from_choice(choice,player,game):
 	if choice.action != "Clue":
 		card_x = game.decks[player.name].deck[len(game.decks[player.name].deck)-choice.pos]
-		choice.color = x.color
-		choice.number = x.color
-		card_id = x.id 	
+		choice.color = card_x.color
+		choice.number = card_x.number
+		card_id = card_x.id 	
 	else:
 		card_id = None
 		

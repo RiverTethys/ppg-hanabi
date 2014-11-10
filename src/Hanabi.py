@@ -110,6 +110,8 @@ def turn(games):
 	print("{}'s turn:\n".format(active_player.name))
 	dec = active_player.decision(games[0])
 	for each_game in games:
+		print(dec)
+		print(dec.id)
 		each_game.action(dec)
 	
 	if (len(games[0].decks["game_deck"]) == 0):
