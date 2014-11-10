@@ -25,8 +25,6 @@ class HanabiConventions(object):
 		positions = []
 		position_dict = {}
 		for card in card_list:
-			print(table.name)
-			print(table.list[card].quality_pile["position"])
 			for bit in table.list[card].quality_pile["position"]:
 				positions.append(bit.value)
 				position_dict[bit.value] = card
