@@ -330,7 +330,7 @@ def ikyk(game,playername,other):
 		temptab.add_bit(Hanabit("confirmed","number",card.number,"final",temptab),card)
 	for pl in game.players:
 		for card in game.decks[pl.name].deck:
-			if (pl.name != player and pl.name != other):
+			if (pl.name != playername and pl.name != other):
 				temptab.add_bit(Hanabit("confirmed","color",card.color,"final",temptab),card)
 				temptab.add_bit(Hanabit("confirmed","number",card.number,"final",temptab),card)
 	#Consult the log to find all clues given regarding 
