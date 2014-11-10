@@ -104,6 +104,16 @@ def event_from_choice(choice,player,game):
 		card_id = None
 		
 	return HanabiEvent(player,choice.tgt,choice.action,card_id,choice.color,choice.number)
+	
+class HanabiNPC(Player):
+	def __init__(self,name,game):
+		Player.__init__(self,name,game)
+
+	def decision(self,game):
+		return event_from_choice(eval_flow(self,game),self,game)
+	
+	def analysis(self):
+		pass
 
 class HanabiSimNPC(HanabiNPC):
 	def __init__(self,name,game,N):
@@ -147,14 +157,4 @@ class HanabiSim(HanabiGame):
 		self.players_initial = deepcopy(self.players)
 		for dude in self.players:
 			dude.initialize_trike(self)
-	
-class HanabiNPC(Player):
-	def __init__(self,name,game):
-		Player.__init__(self,name,game)
-
-	def decision(self,game):
-		return event_from_choice(eval_flow(self,game),self,game)
-	
-	def analysis(self):
-		pass
 		
