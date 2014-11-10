@@ -739,7 +739,7 @@ class HanabiSim(HanabiGame):
 class Tricorder(object):
 	def __init__(self, game,player):
 		self.name = player.name
-		self.tab = BitTable(game,pl=player)
+		self.tab = BitTable(game,pl=player.name)
 		self.bot = game.bot
 		self.con = game.con
 		
@@ -900,7 +900,7 @@ class BitTable(object):
 	def __init__(self,game,pl=None):  #May want to use id's for some of this?
 		self.decktemplate = game.variant.decktemplate
 		if pl:
-			self.name = pl.name
+			self.name = pl
 		else:
 			self.name = "None"
 		self.list = {card: BitFolder(game,card) for card in game.card_list.deck}
@@ -910,7 +910,7 @@ class BitTable(object):
 		self.critical = {card: self.list[card]  for card in self.list if (self.only_one(card.color,card.number) and not self.gone(card))}
 		self.play_q = deque([])
 		if pl:
-			self.discard_q = deque(deepcopy(game.decks[pl.name].deck))
+			self.discard_q = deque(deepcopy(game.decks[pl].deck))
 		else:
 			self.discard_q = deque([])
 		#and other pre-organized lists of bit folders
