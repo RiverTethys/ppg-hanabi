@@ -339,13 +339,14 @@ def ikyk(game,player,other):
 	#This will have to change when rainbow is added back in.
 	for ev in game.past_log:
 		if (ev.type == "Clue" and (ev.tgt == player or ev.tgt == other)):
-			DeductionBot(game.variant).receive_clue(ev,temptab)
+			game.bot.receive_clue(ev,temptab)
 	game.con.order_play_q(temptab)
 	game.con.order_discard_q(temptab)
 	return temptab
 
 def eval_flow(player,game):
 	chs = create_all_choices(player,game)
+	print (chs)
 	clocks_are_low = (game.MAX_CLOCKS/2) - game.clocks
 	# go through the hand. score playables, score others as discardable
 	for enum, c in enumerate(game.decks[player.name].deck):
@@ -369,9 +370,7 @@ def eval_flow(player,game):
 	# evaluate clues based on type of clue theyll think it is
 	for i in chs:
 		if i.action == "Clue":
-			pred = game.con.predict_clue(HanabiEvent(player,i.tgt,"Clue",None,i.color,i.number)
-			                             ,ikyk(game,player,i.tgt)
-										 ,game)
+			pred = game.con.predict_clue(event_from_choice(i,player,game),ikyk(game,player,i.tgt),game)
 			if pred == "playing":
 				i.bump(9)
 			elif pred == "bombing":
@@ -385,8 +384,8 @@ def eval_flow(player,game):
 				i.bump(-10)
 			elif pred == "stalling":
 				i.bump(-10)
-			
-	return chs.sort()
+	chs.sort()
+	return chs
 	
 def create_comp_tab(player):
 	return deepcopy(player.trike.tab)
@@ -400,7 +399,10 @@ def pos_to_card(player,pos):
 
 def event_from_choice(choice,player,game):
 	if choice.action != "Clue":
-		card_id = game.decks[player.name].deck[len(game.decks[player.name].deck)-choice.pos].id 	
+		card_x = game.decks[player.name].deck[len(game.decks[player.name].deck)-choice.pos]
+		choice.color = x.color
+		choice.number = x.color
+		card_id = x.id 	
 	else:
 		card_id = None
 		
@@ -411,7 +413,7 @@ class HanabiNPC(Player):
 		Player.__init__(self,name,game)
 
 	def decision(self,game):
-		return event_from_choice(eval_flow(self,game),self,game)
+		return event_from_choice(eval_flow(self,game).pop(),self,game)
 	
 	def analysis(self):
 		pass
@@ -1111,7 +1113,10 @@ class Choice(object):
 		self.number = number
 		self.pos = pos
 		self.score = 0
-		
+	
+	def __repr__(self):
+		return "{} :  {}{} pos:{} SCORE!: {}".format(self.action,self.color,self.number,self.pos,self.score)
+	
 	def __lt__(self,other):
 		return self.score < other.score
 		
