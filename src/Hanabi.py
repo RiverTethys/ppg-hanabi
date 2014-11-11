@@ -142,17 +142,28 @@ def initialize_hanabi():  ##Separated so that we can test things more easily on 
 
 	bot = DeductionBot(variant)
 	player_name_list = ["Ted","Matthew"]
-	
 	SIM_DEPTH = 0
-	game = HanabiGame("The Overworld",variant,[],bot,player_name_list,SIM_DEPTH,0)
-	
+	game = HanabiGame("The Overworld",variant,[],bot,SIM_DEPTH,0)
+	game.set_game_deck()
+	game.set_stacks()
+	game.initial_player_order(player_name_list)
+	game.update_all_tables()
+	game.initial_hands()
+	game.set_game_log()
+		
 	sim_name_list= []
 	for dude in game.players_initial:
 		sim_name_list.append(dude.name)
 	games = [game]
 	for i in range(SIM_DEPTH):
-		games.append(HanabiSim("sim" + str(i+1), game, sim_name_list, i + 1))
-	
+		games.append(HanabiSim("sim" + str(i+1), game, i + 1))
+		games[i+1].set_game_deck()
+		games[i+1].set_stacks()
+		games[i+1].initial_player_order(sim_name_list)
+		games[i+1].update_all_tables()
+		games[i+1].initial_hands()
+		games[i+1].set_game_log()	
+		
 	for x in games:
 		x.set_conventions(HanabiConventions(x))
 	
