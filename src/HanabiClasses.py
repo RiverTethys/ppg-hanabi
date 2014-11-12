@@ -366,24 +366,33 @@ def eval_flow(player,game):
 					for num, elt in enumerate(player.trike.tab.discard_q):
 						if elt == c:
 							qpos = num
+							if clocks_are_low < 0: ### seeing if this corrects the early discarding
+								qpos += 2
 					i.bump(1 + len(player.trike.tab.discard_q) - qpos) 
 	# evaluate clues based on type of clue theyll think it is
 	for i in chs:
 		if i.action == "Clue":
-			pred = game.con.predict_clue(event_from_choice(i,player,game),ikyk(game,player.name,i.tgt),game)
-			if pred == "playing":
-				i.bump(9)
-			elif pred == "bombing":
-				i.bump(-10)
-			elif pred == "protective":
-				i.bump(8)
-			elif pred == "dud":
-				i.bump(-10)
-			#these ones are just not implemented yet...
-			elif pred == "multi-play":
-				i.bump(-10)
-			elif pred == "stalling":
-				i.bump(-10)
+			if game.clocks > 0:
+				if game.clocks == 1: ##mild disincentive to cluing when clues are very low
+					i.bump(-1)
+				pred = game.con.predict_clue(event_from_choice(i,player,game),ikyk(game,player.name,i.tgt),game)
+				if pred == "recently given":
+					i.bump(-10)
+				elif pred == "playing":
+					i.bump(9)
+				elif pred == "bombing":
+					i.bump(-10)
+				elif pred == "protective":
+					i.bump(8)
+				elif pred == "dud":
+					i.bump(-10)
+				#these ones are just not implemented yet...
+				elif pred == "multi-play":
+					i.bump(-10)
+				elif pred == "stalling":
+					i.bump(-10)
+			else:
+				i.bump(-10000)
 	chs.sort()
 	return chs
 	

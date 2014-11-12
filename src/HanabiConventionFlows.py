@@ -129,10 +129,14 @@ class HanabiConventions(object):
 	
 	def predict_clue(self,ev,table,game):
 		#possible ways the clue could go.
-		possibilties = ["playing", "bombing", "protective","dud","multi-play","stalling"]
+		possibilties = ["recently given","playing", "bombing", "protective","dud","multi-play","stalling"]
 		
 		ikyk_table = ikyk(game, ev.src, ev.tgt)
 		
+		
+		for i in range(game.variant.playernum - 1): ##Tons of room for improvement here.  This just checks to see if the target received a clue in the last round.
+			if game.past_log[-(i+1)].type == "Clue"  and game.past_log[-(i+1)].tgt == ev.tgt:
+				return "recently given"
 		
 		if (table.clued_cards(ev)):
 			indicated_card = self.newest(table.clued_cards(ev),table,game)
