@@ -271,7 +271,7 @@ class HanabiEvent(object):
 			repstr = "Null Hanabi event"
 		else:
 			repstr = "{} decided to {} ".format(self.src,self.type)
-			if (type == "Clue"):
+			if (self.type == "Clue"):
 				repstr += "{}".format(self.tgt)
 				if (self.number != None):
 					repstr += " about {}'s.".format(self.number)

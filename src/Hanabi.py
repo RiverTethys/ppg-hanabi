@@ -141,7 +141,7 @@ def initialize_hanabi():  ##Separated so that we can test things more easily on 
 	variant = HanabiVariant(3,5,deck_template,[])
 
 	bot = DeductionBot(variant)
-	player_name_list = ["Ted","Matthew"]
+	player_name_list = []
 	
 	SIM_DEPTH = 0
 	game = HanabiGame("The Overworld",variant,[],bot,player_name_list,SIM_DEPTH,0)
@@ -182,10 +182,14 @@ def play_hanabi():
 	game = games[0]
 	
 	while(not (game.defeat or game.victory)):
-		
-		turn(games)
-		write_data(games)
-		
+		try:
+			turn(games)
+			write_data(games)
+		except:
+			logref = open("HanabiLog.hanabilog","w")
+			for elt in game.past_log:
+				logref.write(str(elt)+"\n")
+			logref.close()
 	
 	if game.defeat:
 		print("YOU'VE FAILED!")
@@ -196,7 +200,11 @@ def play_hanabi():
 		
 	for elt in game.past_log:
 		print(elt)
-
+	logref = open("HanabiLog.hanabilog","w")
+	for elt in game.past_log:
+		logref.write(str(elt)+"\n")
+	logref.close()
+		
 if __name__ == "__main__":		
 	play_hanabi()
 
