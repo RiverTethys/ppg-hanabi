@@ -345,6 +345,8 @@ def ikyk(game,playername,other):
 	return temptab
 
 def eval_flow(player,game):
+	for p in game.players:
+		p.trike.update_table(game)
 	chs = create_all_choices(player,game)
 	print (chs)
 	clocks_are_low = (game.MAX_CLOCKS/2) - game.clocks
@@ -363,12 +365,15 @@ def eval_flow(player,game):
 												,qspin=["default","pos","final"]):
 			for i in chs:
 				if i.action == "Discard" and i.pos == (len(game.decks[player.name].deck) - enum):
-					for num, elt in enumerate(player.trike.tab.discard_q):
-						if elt == c:
-							qpos = num
-							if clocks_are_low < 0: ### seeing if this corrects the early discarding
-								qpos += 2
-					i.bump(1 + len(player.trike.tab.discard_q) - qpos) 
+					if len(game.past_log) > game.variant.playernum:
+						for num, elt in enumerate(player.trike.tab.discard_q):
+							if elt == c:
+								qpos = num
+								if clocks_are_low < 0: ### seeing if this corrects the early discarding
+									qpos += 2
+						i.bump(1 + len(player.trike.tab.discard_q) - qpos) 
+					else:
+						i.bump(-10000)
 	# evaluate clues based on type of clue theyll think it is
 	for i in chs:
 		if i.action == "Clue":
@@ -385,7 +390,7 @@ def eval_flow(player,game):
 				elif pred == "protective":
 					i.bump(8)
 				elif pred == "dud":
-					i.bump(-10)
+					i.bump(-1)
 				#these ones are just not implemented yet...
 				elif pred == "multi-play":
 					i.bump(-10)
