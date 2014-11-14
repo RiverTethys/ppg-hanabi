@@ -400,6 +400,8 @@ def eval_flow(player,game):
 			else:
 				i.bump(-10000)
 	chs.sort()
+	for x in chs:
+		print(x)
 	return chs
 	
 def create_comp_tab(player):
@@ -649,7 +651,7 @@ class HanabiGame(object):
 		self.players.append(dude)
 	
 	def initial_player_order(self,player_name_list):
-		npc_names = ["Platypus Bob", "Echidna Jane","Wallaby Jim"]
+		npc_names = ["Platypus Bob", "Echidna Jane","Wallaby Jim","Ted Imposter","Matthew Imposter"]
 		npc_name_list = []
 		if self.variant.playernum < len(player_name_list) +len(npc_name_list):
 			print("Too many players for this variant.")
@@ -1131,7 +1133,13 @@ class Choice(object):
 		self.score = 0
 	
 	def __repr__(self):
-		return "{} :  {}{} pos:{} SCORE!: {}".format(self.action,self.color,self.number,self.pos,self.score)
+		if self.action == "Clue":
+			if self.color:
+				return "{} {}: {} eval:{}".format(self.action,self.tgt[:4],self.color,self.score)
+			if self.number:
+				return "{} {}: {} eval:{}".format(self.action,self.tgt[:4],self.number,self.score)
+		else:
+			return "{}: pos:{} eval:{}".format(self.action,self.pos,self.score)
 	
 	def __lt__(self,other):
 		return self.score < other.score

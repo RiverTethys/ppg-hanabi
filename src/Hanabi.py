@@ -138,7 +138,8 @@ def initialize_hanabi():  ##Separated so that we can test things more easily on 
 	#deck_template = HanabiDeckTemplate(CARD_COLORS,CARD_NUMBERS,{x:{1:3,2:2,3:2,4:2,5:1} for x in ('R','Y','G','B','W','H')})
 	deck_template = HanabiDeckTemplate(CARD_COLORS,CARD_NUMBERS,{x:{1:3,2:2,3:2,4:2,5:1} for x in ('R','Y','G','B','W')})
 	
-	variant = HanabiVariant(3,5,deck_template,[])
+	##(playernum,handsize,deck_template,[])
+	variant = HanabiVariant(4,4,deck_template,[])
 
 	bot = DeductionBot(variant)
 	player_name_list = []
@@ -182,15 +183,15 @@ def play_hanabi():
 	game = games[0]
 	
 	while(not (game.defeat or game.victory)):
-		try:
-			turn(games)
-			write_data(games)
-		except:
-			logref = open("HanabiLog.hanabilog","w")
-			for elt in game.past_log:
-				logref.write(str(elt)+"\n")
-			logref.close()
-			break
+		#try:
+		turn(games)
+		write_data(games)
+		#except:
+		#	logref = open("HanabiLog.hanabilog","w")
+		#	for elt in game.past_log:
+		#		logref.write(str(elt)+"\n")
+		#	logref.close()
+		#	break
 	
 	if game.defeat:
 		print("YOU'VE FAILED!")

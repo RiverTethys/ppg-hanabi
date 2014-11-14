@@ -124,14 +124,15 @@ class DeductionBot(object):
 				if card in table.location[table.name]:
 					if card in table.discard_q:
 						table.discard_q.remove(card)
+				if not table.list[card].query_bit_pile(qtype=["confirmed"],qquality= ["discardability"],qspin = ["neg"]):
+					table.add_bit(Dbit,card)
 			#if it is not the only one, confirmed, discardable, pos
 			elif not table.list[card].query_bit_pile(qtype = ["confirmed"],qquality=["discardability"],qspin=["pos"]):
 				Dbit=Hanabit("confirmed","discardability","discardable","pos",table)
 				if card in table.location[table.name]:
 					if card not in table.discard_q:
 						table.discard_q.append(card)
-				
-			table.add_bit(Dbit,card)
+				table.add_bit(Dbit,card)
 		else: ## Could use some additional work here, for when the color and number are not both known
 			possible_cards = set(self.cards_that_can_be(card,table))
 			played_cards = set([x for x in table.list if table.played(card)])
@@ -256,8 +257,8 @@ class DeductionBot(object):
 					table.add_bit(Nbit,card)
 		if ev.number:
 			#for card in table.location[ev.tgt]:
-			for card in ev.touch and not table.list[card].query_bit_pile(qtype = ["confirmed"],qspin=["final"],qvalue = [ev.number]):
-				if card.number == ev.number:
+			for card in ev.touch:
+				if card.number == ev.number and not table.list[card].query_bit_pile(qtype = ["confirmed"],qspin=["final"],qvalue = [ev.number]):
 					Fbit = Hanabit("confirmed","number",ev.number,"final",table)
 					table.add_bit(Fbit,card)
 				elif not table.list[card].query_bit_pile(qtype = ["confirmed"],qspin=["neg"],qvalue = [ev.number]):

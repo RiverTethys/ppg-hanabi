@@ -153,7 +153,7 @@ class HanabiConventions(object):
 				
 			protective_bool = (ikyk_table.discard_q[0] in table.critical) # there's also a critical card that's about to be discarded
 		
-			if table.list[indicated_card].query_bit_pile(qtype=["confirmed"],qvalue=["playable"],qspin=["pos","final"]):
+			if table.list[indicated_card].query_bit_pile(qtype = ["confirmed"],qquality = ["playability"],qspin = ["pos","final"]):
 				return "playing"
 			elif bombing_bool: 
 				return "bombing"
