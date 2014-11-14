@@ -47,7 +47,7 @@ class HanabiConventions(object):
 				table.play_q.appendleft(card)
 	
 		for card in deepcopy(table.play_q):
-			if table.list[card].query_bit_pile(qquality = ["playability"],qspin = ["final"]):
+			if table.final(card,"playability"):
 				table.play_q.remove(card)
 				table.play_q.appendleft(card)
 	 
@@ -78,7 +78,7 @@ class HanabiConventions(object):
 				table.play_q.appendleft(card)
 			
 		for card in deepcopy(table.play_q):
-			if table.list[card].query_bit_pile(qquality = ["discardability"],qspin = ["final"]):
+			if table.final(card,"discardability"):
 				table.play_q.remove(card)
 				table.play_q.appendleft(card)
 		

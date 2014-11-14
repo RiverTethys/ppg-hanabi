@@ -190,6 +190,7 @@ def play_hanabi():
 			for elt in game.past_log:
 				logref.write(str(elt)+"\n")
 			logref.close()
+			break
 	
 	if game.defeat:
 		print("YOU'VE FAILED!")

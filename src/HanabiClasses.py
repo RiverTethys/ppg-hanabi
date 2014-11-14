@@ -162,8 +162,9 @@ class Player(object):
 		game.decks[self.name].deck.append(card)
 		#update tables
 		for dude in game.players:
-			dude.trike.tab.new_location(card,self.name,game)
-			if dude.name != self.name:
+			if dude.name == self.name:
+				dude.trike.tab.new_location(card,self.name,game)
+			else:
 				dude.trike.tab.new_visible(card,self.name,game)
 		
 	# deprecated. i want it to break if something is still calling these.
@@ -406,7 +407,7 @@ def create_comp_tab(player):
 	
 def pos_to_card(player,pos):
 	for card in player.trike.tab.location[player.name]:
-		if player.trike.tab.list[card].query_bit_pile(qquality="position",qvalue=pos):
+		if player.trike.tab.list[card].query_bit_pile(qquality=["position"],qvalue=[pos]):
 			return card
 	#convert a hand position into a card that can be 
 	#used to create an Event
@@ -555,7 +556,8 @@ class HanabiGame(object):
 			self.play.add(self.decks[player.name].deck.pop(idx))
 			#update tables
 			for dude in self.players:
-				dude.trike.tab.new_location(card,"Play",self)
+				if dude.name != player.name:
+					dude.trike.tab.new_location(card,"Play",self)
 			player.trike.tab.new_visible(card,"Play",self)
 			
 			if len(self.play) == 25:
@@ -572,7 +574,8 @@ class HanabiGame(object):
 		self.discard.add(self.decks[player.name].deck.pop(idx))
 		#update tables
 		for dude in self.players:
-			dude.trike.tab.new_location(card,"Discard",self)
+			if dude.name != player.name:
+				dude.trike.tab.new_location(card,"Discard",self)
 		player.trike.tab.new_visible(card,"Discard",self)
 		
 		
@@ -918,10 +921,11 @@ class BitTable(object):
 		else:
 			self.name = "None"
 		self.list = {card: BitFolder(game,card) for card in game.card_list.deck}
+		self.current_list = self.list
 		self.location = {location.name: {card: self.list[card] for card in location.deck} 
 		                                for deckname, location in game.decks.items()}
 		self.known = {card: self.list[card] for card in self.list if self.fixed(card)}
-		self.critical = {card: self.list[card]  for card in self.list if ( not self.gone(card) and self.only_one(card.color,card.number))}
+		self.critical = {card: self.list[card]  for card in self.list if self.only_one(card.color,card.number)}
 		self.play_q = deque([])
 		if pl:
 			self.discard_q = deque(deepcopy(game.decks[pl].deck))
@@ -999,10 +1003,7 @@ class BitTable(object):
 		return (card_match <= discarded_cards)
 	
 	def final(self,card,quality):
-		for bit in self.list[card].quality_pile[quality]:
-			if bit.type=="confirmed" and bit.spin == "final":
-				return True
-		return False
+		return self.list[card].query_bit_pile(qtype=["confirmed"],qquality = [quality],qspin = ["final"])
 
 	def clued_cards(self,ev):
 		if (ev.color):
@@ -1014,8 +1015,7 @@ class BitTable(object):
 	def played(self,card):
 		card_match = set([x for x in self.list if x.color==card.color and x.number==card.number])
 		played_cards = set([x for x in self.location["Play"]])
-		intersection = card_match & played_cards
-		return (len(intersection)==1)
+		return card_match & played_cards
 	
 	def only_one(self,color,number):  #Needs embellishment, perhaps.  Might be the case that there are zero left.
 		total = self.decktemplate.distr[color][number]
@@ -1023,8 +1023,6 @@ class BitTable(object):
 		number_left = total - len(gone_list)
 		if number_left == 1:
 			return True
-		if number_left == 0:
-			print("Just asked if a card that's already gone is the only_one.")
 		return False		
 	
 	
@@ -1051,7 +1049,7 @@ class BitTable(object):
 					in_some_hand = True
 					self.new_position(card,p.name,game)
 			if (not in_some_hand):
-				if self.list[card].query_bit_pile(qquality = ["position"], qspin = ["final"]):
+				if self.final(card,"position"):
 					self.list[card].clear(cquality = "position")
 			
 			
