@@ -102,7 +102,7 @@ class DeductionBot(object):
 					table.play_q.remove(card)  #Our first set of bot will be super cautious
 		
 	def deduce_discardability(self,card,table):
-		if table.list[card].query_bit_pile(qquality = ["discardability"],qspin = ["final"]):
+		if table.list[card].query_bit_pile(qtype = ["confirmed"],qquality = ["discardability"],qspin = ["final","neg"]):
 			return
 		known_color = table.list[card].query_bit_pile(qtype =["confirmed"],qquality = ["color"],qspin = ["final","pos"])
 		known_number = table.list[card].query_bit_pile(qtype = ["confirmed"],qquality = ["number"],qspin = ["final","pos"])
@@ -126,7 +126,7 @@ class DeductionBot(object):
 					if card in table.discard_q:
 						table.discard_q.remove(card)
 			#if it is not the only one, confirmed, discardable, pos
-			else:
+			elif not table.list[card].query_bit_pile(qtype = ["confirmed"],qquality=["discardability"],qspin=["pos"]):
 				Dbit=Hanabit("confirmed","discardability","discardable","pos",table)
 				if card in table.location[table.name]:
 					if card not in table.discard_q:
@@ -235,19 +235,19 @@ class DeductionBot(object):
 		if ev.color:
 			#for card in table.location[ev.tgt]:
 			for card in ev.touch:
-				if card.color == ev.color:
+				if card.color == ev.color and not table.list[card].query_bit_pile(qtype = ["confirmed"],qspin = ["final"], qvalue = [ev.color]):
 					Fbit = Hanabit("confirmed","color",ev.color,"final",table)
 					table.add_bit(Fbit,card)
-				else:
+				elif not table.list[card].query_bit_pile(qtype = ["confirmed"],qspin = ["neg"], qvalue = [ev.color]):
 					Nbit = Hanabit("confirmed","color",ev.color,"neg",table)
 					table.add_bit(Nbit,card)
 		if ev.number:
 			#for card in table.location[ev.tgt]:
-			for card in ev.touch:
+			for card in ev.touch and not table.list[card].query_bit_pile(qtype = ["confirmed"],qspin=["final"],qvalue = [ev.number]):
 				if card.number == ev.number:
 					Fbit = Hanabit("confirmed","number",ev.number,"final",table)
 					table.add_bit(Fbit,card)
-				else:
+				elif not table.list[card].query_bit_pile(qtype = ["confirmed"],qspin=["neg"],qvalue = [ev.number]):
 					Nbit = Hanabit("confirmed","number",ev.number,"neg",table)
 					table.add_bit(Nbit,card)
 		

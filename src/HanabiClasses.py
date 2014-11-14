@@ -921,7 +921,7 @@ class BitTable(object):
 		self.location = {location.name: {card: self.list[card] for card in location.deck} 
 		                                for deckname, location in game.decks.items()}
 		self.known = {card: self.list[card] for card in self.list if self.fixed(card)}
-		self.critical = {card: self.list[card]  for card in self.list if (self.only_one(card.color,card.number) and not self.gone(card))}
+		self.critical = {card: self.list[card]  for card in self.list if ( not self.gone(card) and self.only_one(card.color,card.number))}
 		self.play_q = deque([])
 		if pl:
 			self.discard_q = deque(deepcopy(game.decks[pl].deck))
@@ -1024,7 +1024,7 @@ class BitTable(object):
 		if number_left == 1:
 			return True
 		if number_left == 0:
-			print("Just asked if a card that's already gone is the only_one.  You might want to change the list you loop over.")
+			print("Just asked if a card that's already gone is the only_one.")
 		return False		
 	
 	
@@ -1076,7 +1076,7 @@ class BitTable(object):
 		                                for deckname, location in game.decks.items()}
 	
 	def update_critical_list(self):
-		self.critical = {card: self.list[card]  for card in self.list if (self.only_one(card.color,card.number) and not self.gone(card))}
+		self.critical = {card: self.list[card]  for card in self.list if ( not self.gone(card) and self.only_one(card.color,card.number))}
 	
 	def new_visible(self,card,location,game):
 		if not self.final(card,"color"):
