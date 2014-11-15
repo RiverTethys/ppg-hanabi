@@ -385,33 +385,65 @@ def eval_flow(player,game):
 	print (chs)
 	clocks_are_low = (game.MAX_CLOCKS/2) - game.clocks
 	# go through the hand. score playables, score others as discardable
-	for enum, c in enumerate(game.decks[player.name].deck):
-		if player.trike.tab.list[c].query_bit_pile(qtype=["confirmed","conventional"] 
+	
+	for i in chs:
+		if i.action =="Play":
+			i.bump(-(i.pos))
+			c = pos_to_card(player,i.pos)
+			if player.trike.tab.list[c].query_bit_pile(qtype=["confirmed"] 
 											  ,qquality=["playability"]
 											  ,qvalue=["playable"]
-											  ,qspin=["pos","final"]):
-			for i in chs:
-				if i.action == "Play" and i.pos == (len(game.decks[player.name].deck) - enum):
-					i.bump(10)
-		elif player.trike.tab.list[c].query_bit_pile(qtype=["default","conventional"] 
+											  ,qspin=["final"]):
+				i.bump(18)
+			elif player.trike.tab.list[c].query_bit_pile(qtype=["confirmed","conventional"] 
+											  ,qquality=["playability"]
+											  ,qvalue=["playable"]
+											  ,qspin=["pos"]):
+				i.bump(14)							  
+	
+	# for enum, c in enumerate(game.decks[player.name].deck):
+		# if player.trike.tab.list[c].query_bit_pile(qtype=["confirmed"] 
+											  # ,qquality=["playability"]
+											  # ,qvalue=["playable"]
+											  # ,qspin=["pos","final"]):
+			# for i in chs:
+				# if i.action == "Play" and i.pos == (len(game.decks[player.name].deck) - enum):
+					# i.bump(10)
+		
+		
+		elif i.action == "Discard":
+			c = pos_to_card(player,i.pos)
+			i.bump(i.pos)
+			if player.trike.tab.list[c].query_bit_pile(qtype=["default","conventional","confirmed"] 
 											    ,qquality=["discardability"]
 											    ,qvalue=["discardable"]
-												,qspin=["default","pos","final"]):
-			for i in chs:
-				if i.action == "Discard" and i.pos == (len(game.decks[player.name].deck) - enum):
-					if len(game.past_log) > game.variant.playernum:
-						for num, elt in enumerate(player.trike.tab.discard_q):
-							if elt == c:
-								qpos = num
+												,qspin=["final","pos","default"]):
+				
+				if len(game.past_log) > game.variant.playernum:
+						for num, card_in_q in enumerate(player.trike.tab.discard_q):
+							if card_in_q == c:
+								q_posit = num
+								adjustment = - q_posit
 								if clocks_are_low < 0: ### seeing if this corrects the early discarding
-									qpos += 2
-						i.bump(1 + len(player.trike.tab.discard_q) - qpos) 
-					else:
-						i.bump(-10000)
-	# evaluate clues based on type of clue theyll think it is
-	for i in chs:
-		if i.action == "Clue":
+									adjustment -= 9
+								elif game.clocks == 1:
+									adjustment +=1
+								elif game.clocks == 0:
+									adjustment +=3
+								
+						i.bump(adjustment) 
+				else:
+					i.bump(-10000)
+			else:
+				i.bump(-game.variant.handsize)
+			
+					
+	# evaluate clues based on type of clue they'll think it is
+	
+		elif i.action == "Clue":
 			if game.clocks > 0:
+				if clocks_are_low <0:
+					i.bump(2)
 				if game.clocks == 1: ##mild disincentive to cluing when clues are very low
 					i.bump(-1)
 				pred = game.con.predict_clue(event_from_choice(i,player,game),ikyk(game,player.name,i.tgt),game)
@@ -420,13 +452,13 @@ def eval_flow(player,game):
 				if pred == "recently given":
 					i.bump(-10)
 				elif pred == "playing":
-					i.bump(9)
+					i.bump(10)
 				elif pred == "bombing":
-					i.bump(-10)
+					i.bump(-15)
 				elif pred == "protective":
 					i.bump(8)
 				elif pred == "dud":
-					i.bump(-1)
+					i.bump(1)
 				#these ones are just not implemented yet...
 				elif pred == "multi-play":
 					i.bump(-10)

@@ -106,6 +106,8 @@ def print_table_list(games,game_name,player_name,type,quality,value,spin):
 
 
 def turn(games):
+	for each_game in games:
+		each_game.update_all_tables()
 	active_player = games[0].players[0]
 	print("{}'s turn:\n".format(active_player.name))
 	dec = active_player.decision(games[0])
