@@ -135,10 +135,12 @@ def write_data(games):
 	
 def initialize_hanabi():  ##Separated so that we can test things more easily on the command line
 	#CARD_COLORS = ['R','Y','G','B','W','H']
-	CARD_COLORS = ['R','Y','G','B','W']
-	CARD_NUMBERS = [1,2,3,4,5]
+	CARD_COLORS = ['R','Y','G','B','W','D']
+	CARD_NUMBERS = [1,2,3,4,5,1000]
 	#deck_template = HanabiDeckTemplate(CARD_COLORS,CARD_NUMBERS,{x:{1:3,2:2,3:2,4:2,5:1} for x in ('R','Y','G','B','W','H')})
-	deck_template = HanabiDeckTemplate(CARD_COLORS,CARD_NUMBERS,{x:{1:3,2:2,3:2,4:2,5:1} for x in ('R','Y','G','B','W')})
+	distr = {x:{1:3,2:2,3:2,4:2,5:1,1000:0} for x in ('R','Y','G','B','W')}
+	distr['D'] = {1:0,2:0,3:0,4:0,5:0,1000:0}
+	deck_template = HanabiDeckTemplate(CARD_COLORS,CARD_NUMBERS,distr)
 	
 	##(playernum,handsize,deck_template,[])
 	variant = HanabiVariant(4,4,deck_template,[])

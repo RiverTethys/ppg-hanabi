@@ -52,7 +52,7 @@ class Deck(object):
 		
 	def build_deck(self):
 		deck = []
-		card_id = 0	
+		card_id = 1	
 		for color in self.distr:
 			for num in self.distr[color]:
 				for i in range(self.distr[color][num]):
@@ -62,7 +62,7 @@ class Deck(object):
 		
 	def build_deck_from_file(self,deckfile):
 		deck = []
-		card_id = 0
+		card_id = 1
 		with open(deckfile) as fileref:
 			for cl in fileref:
 				m = re.search('^([12345])([BGRWY])$',cl)
@@ -551,11 +551,14 @@ class HanabiGame(object):
 	
 	def set_game_deck(self,deckfile=None):
 		self.add_card_list(HanabiGameDeck("card_list",self.variant, self.variant.decktemplate,deckfile=deckfile))
-		game_deck = HanabiGameDeck("game_deck",self.variant,self.variant.decktemplate,deckfile=deckfile)
+		game_deck = HanabiGameDeck("game_deck",self.variant,self.variant.decktemplate,deckfile=deckfile)		
 		if self.depth == 0:
 			game_deck.print_distr()
 		if not deckfile:
 			game_deck.shuffle()
+		last_round_cushion = [Card(1000,"D",1000) for x in range(self.variant.playernum + 1)]
+		game_deck.deck = last_round_cushion + game_deck.deck
+		
 		initial_game_deck = deepcopy(game_deck)
 		self.add_initial_game_deck(initial_game_deck)
 		self.add_deck(game_deck)
@@ -972,7 +975,7 @@ class BitTable(object):
 			self.name = pl
 		else:
 			self.name = "None"
-		self.list = {card: BitFolder(game,card) for card in game.card_list.deck}
+		self.list = {card: BitFolder(game,card) for card in game.initial_game_deck.deck}
 		self.current_list = self.list
 		
 		# for debugging
@@ -1003,7 +1006,7 @@ class BitTable(object):
 	#		else:
 	#			print(r)
 			
-		self.location = {location.name: {card: self.list[card] for card in location.deck} 
+		self.location = {location.name: {card: self.list[card] for card in location.deck if card.color in self.decktemplate.colors} 
 		                                for deckname, location in game.decks.items()}
 		self.known = {card: self.list[card] for card in self.list if self.fixed(card)}
 		self.critical = {card: self.list[card]  for card in self.list if self.only_one(card.color,card.number)}
@@ -1033,7 +1036,9 @@ class BitTable(object):
 				elif tail.spin == "neg":
 					print("{}: Uh oh. This contradicts some final information.".format(self.name))
 					print(tail)
+					#takeonefortheteam
 					return
+					
 				else:
 					print("{}: It was already final that this card is {}.".format(self.name,bit.value))
 					return
@@ -1151,7 +1156,7 @@ class BitTable(object):
 			self.add_bit(Hanabit("default","discardability","discardable","default",self),card)
 	
 	def update_location_list(self,game):
-		self.location = {location.name: {card: self.list[card] for card in location.deck} 
+		self.location = {location.name: {card: self.list[card] for card in location.deck if card.color in self.decktemplate.colors} 
 		                                for deckname, location in game.decks.items()}
 	
 	def update_critical_list(self):
