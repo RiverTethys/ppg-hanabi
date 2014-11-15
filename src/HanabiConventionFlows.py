@@ -47,7 +47,7 @@ class HanabiConventions(object):
 				table.play_q.appendleft(card)
 	
 		for card in deepcopy(table.play_q):
-			if table.list[card].query_bit_pile(qquality = ["playability"],qspin = ["final"]):
+			if table.final(card,"playability"):
 				table.play_q.remove(card)
 				table.play_q.appendleft(card)
 	 
@@ -78,7 +78,7 @@ class HanabiConventions(object):
 				table.play_q.appendleft(card)
 			
 		for card in deepcopy(table.play_q):
-			if table.list[card].query_bit_pile(qquality = ["discardability"],qspin = ["final"]):
+			if table.final(card,"discardability"):
 				table.play_q.remove(card)
 				table.play_q.appendleft(card)
 		
@@ -129,11 +129,16 @@ class HanabiConventions(object):
 	
 	def predict_clue(self,ev,table,game):
 		#possible ways the clue could go.
-		possibilties = ["playing", "bombing", "protective","dud","multi-play","stalling"]
+		possibilties = ["recently given","playing", "bombing", "protective","dud","multi-play","stalling"]
 		
 		ikyk_table = ikyk(game, ev.src, ev.tgt)
 		
 		
+		
+		for i in range(min(game.variant.playernum - 1,len(game.past_log))): ##Tons of room for improvement here.  This just checks to see if the target received a clue in the last round.
+			if game.past_log[-(i+1)].type == "Clue"  and game.past_log[-(i+1)].tgt == ev.tgt:
+				return "recently given"
+			
 		if (table.clued_cards(ev)):
 			indicated_card = self.newest(table.clued_cards(ev),table,game)
 		
@@ -148,7 +153,7 @@ class HanabiConventions(object):
 				
 			protective_bool = (ikyk_table.discard_q[0] in table.critical) # there's also a critical card that's about to be discarded
 		
-			if table.list[indicated_card].query_bit_pile(qtype=["confirmed"],qvalue=["playable"],qspin=["pos","final"]):
+			if table.list[indicated_card].query_bit_pile(qtype = ["confirmed"],qquality = ["playability"],qspin = ["pos","final"]):
 				return "playing"
 			elif bombing_bool: 
 				return "bombing"
