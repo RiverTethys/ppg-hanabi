@@ -1,5 +1,6 @@
 from collections import deque
 import random
+import re
 from copy import deepcopy
 
 class Card(object):
@@ -9,9 +10,11 @@ class Card(object):
 		self.color = color
 	
 	def __repr__(self):
+		#return "({})".format(self.id) + str(self.number) + self.color + " "
 		return str(self.number) + self.color + " "
 
 	def __str__(self):	
+		#return "({})".format(self.id) + str(self.number) + self.color + " "
 		return str(self.number) + self.color + " "
 		
 	def __eq__(self,other):
@@ -21,24 +24,26 @@ class Card(object):
 		return hash(self.id)
 
 class Deck(object):
-	def __init__(self,name,vnt,template):
+	def __init__(self,name,vnt,template,deckfile=None):
 		self.colors  = vnt.colors
 		self.numbers = vnt.numbers
 		self.name = name
 		self.distr = template.distr
-		self.deck = self.build_deck()
+		if not deckfile:
+			self.deck = self.build_deck()
+		else:
+			self.deck = self.build_deck_from_file(deckfile)
 		
 	def set_distr(self,distr):
 		self.distr = distr
 	
 	def print_distr(self):
-		#print("{} distr:  {}".format(self.name,str(self.distr)))
 		print("{} distr:".format(self.name))
 		r = ""
 		for c in self.colors:
 			for n, q in self.distr[c].items():
 				if not (q == 0):
-					r = r + "{}{}: {}  ".format(c,n,q)
+					r = r + "{}{}: {}  ".format(n,c,q)
 			r = r + "\n"
 		if not r.replace("\n",""):
 			print("Empty.\n")
@@ -53,6 +58,28 @@ class Deck(object):
 				for i in range(self.distr[color][num]):
 					deck.append(Card(card_id,color,num))
 					card_id += 1
+		return deck
+		
+	def build_deck_from_file(self,deckfile):
+		deck = []
+		card_id = 0
+		with open(deckfile) as fileref:
+			for cl in fileref:
+				m = re.search('^([12345])([BGRWY])$',cl)
+				deck.append(Card(card_id,m.group(2),int(m.group(1))))
+				card_id += 1
+		print("Deck built from file {}.".format(deckfile))
+		r = ""
+		i = 0
+		for card in deck:
+			r = r + "{}: {} ".format(card.id,card)
+			i += 1
+			if (i % 10 == 0):
+				r = r + "\n"
+		if not r.replace("\n",""):
+			print("Empty.\n")
+		else:
+			print(r)
 		return deck
 		
 	def shuffle(self):
@@ -166,27 +193,39 @@ class Player(object):
 				dude.trike.tab.new_location(card,self.name,game)
 			else:
 				dude.trike.tab.new_visible(card,self.name,game)
-		
-	# deprecated. i want it to break if something is still calling these.
-	# def discard(self,game,pos,deck):
-		# d = game.decks[self.name].deck[-pos]
-		# color = game.decks[self.name].deck[-pos].color
-		# game.discard_card(game.decks[self.name].deck.pop(-pos))
-		# self.draw(game,deck)
-		# return d
-		
-		
-	# def play(self,game,pos,deck):
-		# a=game.decks[self.name].deck[-pos]	
-		# color = a.color
-		# game.play_card(game.decks[self.name].deck.pop(-pos))
-		# self.draw(game,deck)
-		# return a
 	
+	def tst_decision(self,game,tstq):
+		# dont ask for input because the
+		# test has filled in a test action queue
+		# TODO: implement cluing for test action queue
+		qdec = tstq.pop(0)
+		action = qdec[0]
+		position = qdec[1]
+		target = qdec[2]
+		color = qdec[3]
+		number = qdec[4]
+		current_event = game.future_log.popleft()
+		if (action=='a' or action=='A'):
+			a = game.decks[self.name].deck[-position]
+			current_event.make_play(self.name,a.id,a.color,a.number)
+		elif (action=='d' or action=='D'):
+			d = game.decks[self.name].deck[-position]
+			current_event.make_discard(self.name,d.id,d.color,d.number)
+		elif (action == 'c' or action == 'C'):
+			if color and color != "x":
+				current_event.make_clue(self.name
+				                       ,game.players_initial[target].name
+									   ,color.upper()
+									   ,None)
+			elif number and number != 0:
+				current_event.make_clue(self.name
+				                       ,game.players_initial[target].name
+									   ,None
+									   ,number)
+			else:
+				print("Bad clue given in script!")
+		return current_event
 		
-	#def clue(self,player,clue):
-	#	pass
-	
 	def decision(self,game):
 		current_event = game.future_log.popleft()
 		while(True):
@@ -215,20 +254,10 @@ class Player(object):
 						
 					#build clue content options
 					print("\nWhat clue do you want to give?")
+					# add H back in when we tackle rainbow
 					possible_colors = set(game.colors) - set("H")
 					possible_numbers = set(game.numbers)
-					# We dont display allowed clues because technically you
-					# can clue about having 0 of something
-					# print("\nColors: ")
-					# for color in possible_colors:
-						# print("{} ".format(color))
-					# print("\nNumbers: ")
-					# for number in possible_numbers:
-						# print("{} ".format(number))
 
-						
-					# dont need to call game.action because the return value
-					# is being used in a call to it at the top level
 					while True:
 						try:
 							clue_choice = input("\n")
@@ -266,6 +295,7 @@ class HanabiEvent(object):
 		self.color = color
 		self.number = number
 		self.touch = []
+		self.bomb = None
 		
 	def __repr__(self):
 		if (self.src == None):
@@ -282,6 +312,8 @@ class HanabiEvent(object):
 					repstr += "... about what, we may never know."
 			else:
 				repstr += "{}{}.".format(self.number,self.color)
+				if self.bomb:
+					repstr += " Regrettably."
 		return repstr
 	
 	def make_clue(self,src,tgt,color,number):
@@ -452,7 +484,7 @@ class HanabiSimNPC(HanabiNPC):
 		return False
 
 class HanabiGame(object):
-	def __init__(self,name,variant,conventions,deduction_bot,player_name_list,total_depth,depth):
+	def __init__(self,name,variant,conventions,deduction_bot,total_depth,depth):
 		self.name = name
 		self.total_depth = total_depth
 		self.variant = variant
@@ -478,22 +510,17 @@ class HanabiGame(object):
 		self.initial_game_deck = {}
 		self.decks = {}
 		self.depth = depth
-		self.set_game_deck()
-		self.set_stacks()
-		self.initial_player_order(player_name_list)
-		self.update_all_tables()
-		self.initial_hands()
-		self.set_game_log()
 	
 	def __repr__(self):
 		return self.name
 	
-	def set_game_deck(self):
-		self.add_card_list(HanabiGameDeck("card_list",self.variant, self.variant.decktemplate))
-		game_deck = HanabiGameDeck("game_deck",self.variant,self.variant.decktemplate)
+	def set_game_deck(self,deckfile=None):
+		self.add_card_list(HanabiGameDeck("card_list",self.variant, self.variant.decktemplate,deckfile=deckfile))
+		game_deck = HanabiGameDeck("game_deck",self.variant,self.variant.decktemplate,deckfile=deckfile)
 		if self.depth == 0:
 			game_deck.print_distr()
-		game_deck.shuffle()
+		if not deckfile:
+			game_deck.shuffle()
 		initial_game_deck = deepcopy(game_deck)
 		self.add_initial_game_deck(initial_game_deck)
 		self.add_deck(game_deck)
@@ -564,9 +591,11 @@ class HanabiGame(object):
 			
 			if len(self.play) == 25:
 				self.victory = True
+			return True
 		else:
 			self.bomb()
-			self.discard_card(card,player)	
+			self.discard_card(card,player)
+			return False
 		
 	def discard_card(self,card,player):
 		for handcard in self.decks[player.name].deck:
@@ -611,7 +640,10 @@ class HanabiGame(object):
 								print("Attempting to play a card.")
 								if self.depth == 0:	
 									print("Attempting to play {}".format(tempcard))
-								self.play_card(card,p)	
+								if self.play_card(card,p):
+									ev.bomb = False
+								else:
+									ev.bomb = True
 								if(ev.number==5 and tempcard in self.play.deck and self.clocks < self.MAX_CLOCKS):
 									self.inc_clocks()
 								p.draw(self,"game_deck")
@@ -729,10 +761,10 @@ class HanabiGame(object):
 			self.write_state(dude)
 	
 class HanabiSim(HanabiGame):
-	def __init__(self,name,game,sim_player_list,N):
+	def __init__(self,name,game,N):
 		game_copy = deepcopy(game)
 		self.deck_copy = deepcopy(game.initial_game_deck)
-		super(HanabiSim,self).__init__(name,game_copy.variant,game_copy.con,game.bot,sim_player_list,game_copy.total_depth,N)
+		super(HanabiSim,self).__init__(name,game_copy.variant,game_copy.con,game.bot,game_copy.total_depth,N)
 		
 	def add_player(self,dude):
 		self.players.append(dude)
@@ -924,6 +956,35 @@ class BitTable(object):
 			self.name = "None"
 		self.list = {card: BitFolder(game,card) for card in game.card_list.deck}
 		self.current_list = self.list
+		
+		# for debugging
+	#	print("{} BitTable list:".format(self.name))
+	#	r = ""
+	#	i = 0
+	#	for elt in self.list:
+	#		r = r + "{}: {}  ".format(elt,self.list[elt])
+	#		i += 1
+	#		if (i % 8 == 0):
+	#			r = r + "\n"
+	#	if not r.replace("\n",""):
+	#		print("Empty.\n")
+	#	else:
+	#		print(r)
+	#		
+	#	for deckname, location in game.decks.items():
+	#		print("Deck: {}".format(deckname))
+	#		r = ""
+	#		i = 0
+	#		for card in location.deck:
+	#			r = r + "{}: {}  ".format(i,card)
+	#			i += 1
+	#			if (i % 8 == 0):
+	#				r = r + "\n"
+	#		if not r.replace("\n",""):
+	#			print("Empty.\n")
+	#		else:
+	#			print(r)
+			
 		self.location = {location.name: {card: self.list[card] for card in location.deck} 
 		                                for deckname, location in game.decks.items()}
 		self.known = {card: self.list[card] for card in self.list if self.fixed(card)}
