@@ -200,6 +200,9 @@ class Player(object):
 		qdec = tstq.pop(0)
 		action = qdec[0]
 		position = qdec[1]
+		target = qdec[2]
+		color = qdec[3]
+		number = qdec[4]
 		current_event = game.future_log.popleft()
 		if (action=='a' or action=='A'):
 			a = game.decks[self.name].deck[-position]
@@ -207,6 +210,19 @@ class Player(object):
 		elif (action=='d' or action=='D'):
 			d = game.decks[self.name].deck[-position]
 			current_event.make_discard(self.name,d.id,d.color,d.number)
+		elif (action == 'c' or action == 'C'):
+			if color and color != "x":
+				current_event.make_clue(self.name
+				                       ,game.players_initial[target].name
+									   ,color.upper()
+									   ,None)
+			elif number and number != 0:
+				current_event.make_clue(self.name
+				                       ,game.players_initial[target].name
+									   ,None
+									   ,number)
+			else:
+				print("Bad clue given in script!")
 		return current_event
 		
 	def decision(self,game):
@@ -237,6 +253,7 @@ class Player(object):
 						
 					#build clue content options
 					print("\nWhat clue do you want to give?")
+					# add H back in when we tackle rainbow
 					possible_colors = set(game.colors) - set("H")
 					possible_numbers = set(game.numbers)
 

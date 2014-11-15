@@ -56,8 +56,18 @@ def tst_play_hanabi(test_number):
 	tstq = []
 	with open(".\\testscript{}.hanabiscript".format(test_number)) as fileref:
 		for entry in fileref:
-			m = re.search('^([acd])([12345])$',entry)
-			tstq.append([m.group(1),int(m.group(2))])
+			if re.match('^#',entry):
+				continue
+			m = re.search('^([acd])([012345])([012345])([xbBgGrRwWyY])([012345])$',entry)
+			if not m:
+				print("Ignoring unrecognized script line: {}".format(entry))
+				continue
+			tstq.append([m.group(1)
+			            ,int(m.group(2))
+						,int(m.group(3))
+						,m.group(4)
+						,int(m.group(5))
+						])
 	
 	while(tstq and not (game.defeat or game.victory)):
 		
