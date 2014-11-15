@@ -39,7 +39,7 @@ class DeductionBot(object):
 	
 	def cards_that_can_be(self,card,table): #for the given card, return the LIST of cards it could be
 		if table.fixed(card):
-			return set([card])
+			return [card]
 		card_list = [x for x in table.list if not table.gone(x)]
 		for bit in table.list[card].pile:   #eliminate based on information about "card"
 			if bit.quality == "color":

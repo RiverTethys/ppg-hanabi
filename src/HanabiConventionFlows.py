@@ -141,19 +141,21 @@ class HanabiConventions(object):
 			
 		if (table.clued_cards(ev)):
 			indicated_card = self.newest(table.clued_cards(ev),table,game)
-		
+			#print(indicated_card)
 			self.bot.receive_clue(ev,ikyk_table)
 		
 		
 		
 			playable_cards = set([x for x in table.list if self.bot.playable(x,game)])
+			#print(playable_cards)
 			ikyk_possible_cards = set(self.bot.cards_that_can_be(indicated_card,ikyk_table))
 			
 			bombing_bool = (indicated_card not in playable_cards) and (ikyk_possible_cards & playable_cards) # (knowing the information the clue gives might lead the tgt to think the indicated card was playable)
 				
 			protective_bool = (ikyk_table.discard_q[0] in table.critical) # there's also a critical card that's about to be discarded
-		
-			if table.list[indicated_card].query_bit_pile(qtype = ["confirmed"],qquality = ["playability"],qspin = ["pos","final"]):
+			
+			#if table.list[indicated_card].query_bit_pile(qtype = ["confirmed"],qquality = ["playability"],qspin = ["pos","final"]):
+			if self.bot.playable(indicated_card,game):
 				return "playing"
 			elif bombing_bool: 
 				return "bombing"

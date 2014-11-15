@@ -415,6 +415,8 @@ def eval_flow(player,game):
 				if game.clocks == 1: ##mild disincentive to cluing when clues are very low
 					i.bump(-1)
 				pred = game.con.predict_clue(event_from_choice(i,player,game),ikyk(game,player.name,i.tgt),game)
+				#print(i)
+				#print(pred)
 				if pred == "recently given":
 					i.bump(-10)
 				elif pred == "playing":
