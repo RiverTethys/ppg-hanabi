@@ -431,7 +431,9 @@ def eval_flow(player,game):
 								elif game.clocks == 0:
 									adjustment +=3
 								
-						i.bump(adjustment) 
+								i.bump(adjustment)
+						if c not in player.trike.tab.discard_q:
+							i.bump(-5)
 				else:
 					i.bump(-10000)
 			else:

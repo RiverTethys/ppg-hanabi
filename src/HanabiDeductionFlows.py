@@ -196,11 +196,11 @@ class DeductionBot(object):
 			for color in bit_folder.values["color"]:
 				if self.all_known(color,known_number,table):
 					Nbit = Hanabit("confirmed","color",color,"neg",table)
-					table.add_bit(NBit,card)
+					table.add_bit(Nbit,card)
 		#check for deduction by negative information/process of elimination
 		x = self.negative_info_elim(bit_folder.quality_pile["color"],bit_folder.values["color"])
 		if x[0]:
-			Fbit = Hanabit("confirmed",quality,x[1],"final",table)
+			Fbit = Hanabit("confirmed","color",x[1],"final",table)
 			table.add_bit(FBit,card)
 			return
 	
