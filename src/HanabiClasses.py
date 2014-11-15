@@ -294,6 +294,7 @@ class HanabiEvent(object):
 		self.color = color
 		self.number = number
 		self.touch = []
+		self.bomb = None
 		
 	def __repr__(self):
 		if (self.src == None):
@@ -310,6 +311,8 @@ class HanabiEvent(object):
 					repstr += "... about what, we may never know."
 			else:
 				repstr += "{}{}.".format(self.number,self.color)
+				if self.bomb:
+					repstr += " Regrettably."
 		return repstr
 	
 	def make_clue(self,src,tgt,color,number):
@@ -570,9 +573,11 @@ class HanabiGame(object):
 			
 			if len(self.play) == 25:
 				self.victory = True
+			return True
 		else:
 			self.bomb()
-			self.discard_card(card,player)	
+			self.discard_card(card,player)
+			return False
 		
 	def discard_card(self,card,player):
 		for handcard in self.decks[player.name].deck:
@@ -616,7 +621,10 @@ class HanabiGame(object):
 								print("Attempting to play a card.")
 								if self.depth == 0:	
 									print("Attempting to play {}".format(tempcard))
-								self.play_card(card,p)	
+								if self.play_card(card,p):
+									ev.bomb = False
+								else:
+									ev.bomb = True
 								if(ev.number==5 and tempcard in self.play.deck and self.clocks < self.MAX_CLOCKS):
 									self.inc_clocks()
 								p.draw(self,"game_deck")
