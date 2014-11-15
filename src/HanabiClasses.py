@@ -188,11 +188,12 @@ class Player(object):
 		card = game.draw_card(deck)
 		game.decks[self.name].deck.append(card)
 		#update tables
-		for dude in game.players:
-			if dude.name == self.name:
-				dude.trike.tab.new_location(card,self.name,game)
-			else:
-				dude.trike.tab.new_visible(card,self.name,game)
+		if card:
+			for dude in game.players:
+				if dude.name == self.name:
+					dude.trike.tab.new_location(card,self.name,game)
+				else:
+					dude.trike.tab.new_visible(card,self.name,game)
 	
 	def tst_decision(self,game,tstq):
 		# dont ask for input because the
@@ -925,23 +926,6 @@ class BitFolder(object):
 			for bit in self.quality_pile[cquality][:]:
 				self.remove_bit(bit)
 			return
-	#Again, left here in case of a mistake
-	# def clear_quality(self,quality):
-		
-		# for bit in self.quality_pile[quality][:]:
-			# self.remove_bit(bit)
-	# def clear_quality(self,quality,type):
-		# for bit in self.quality_pile[quality][:]:
-			# if bit.type == type:
-				# self.remove_bit(bit)
-
-	# def clear_value(self,value):
-		# for bit in self.value_pile[value]:
-			# self.remove_bit(bit)
-	# def clear_value(self,value,type):
-		# for bit in self.value_pile[value]:
-			# if bit.type == type:
-				# self.remove_bit(bit)
 		
 class HanabiList(object):
 	def __init__(self): #The thought here is to make counting and short_list assembly cleaner
@@ -1046,7 +1030,7 @@ class BitTable(object):
 							confirm_string = "is NOT"
 						print("{}: I already confirmed that this card {} {}.".format(self.name,confirm_string,tail.value))
 						return			
-		#DO WE NEED ANY MORE SAFTETIES HERE??
+		#DO WE NEED ANY MORE SAFETIES HERE??
 		#Things like being rainbow when it's already negative for another color should be controlled by the game code/logic, not this mechanism
 		#By now we feel safe to append, but first we: 
 		#remove bits that are conflicting or redundant and less convincing
@@ -1235,6 +1219,7 @@ class Hanabit(object): # a single piece of information
 	
 	def __hash__(self):
 		return hash((self.tab,self.id))	
+
 # def all_known(self,value,table):
 	# if value in self.decktemplate.colors:
 		# value_list = {card:table.list[card] for card in table.list if card.color == value}
