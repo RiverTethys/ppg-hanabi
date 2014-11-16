@@ -227,5 +227,3 @@ src/servertest.py
 src/Hanabi_Progress_AI_Section.py
 *.hanabilog
 *.hanabilog
-src/HanabiLog.hanabilog
-src/HanabiLog.hanabilog

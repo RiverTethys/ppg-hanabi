@@ -116,7 +116,7 @@ def turn(games):
 		print(dec.id)
 		each_game.action(dec)
 	
-	if (len(games[0].decks["game_deck"]) == 0):
+	if (len(games[0].decks["game_deck"]) < 10 and set(games[0].decks["game_deck"].deck) == set([Card(1000,"D",1000)])):
 		games[0].inc_fc()
 	if (games[0].final_countdown > len(games[0].players)):
 		games[0].victory = True
@@ -211,7 +211,9 @@ def play_hanabi():
 	if game.defeat:
 		print("YOU'VE FAILED!")
 	elif game.victory:
-		print("You have completed the firework show with a score of {}.".format(len(game.play)))
+		print("\n**************************************************************")
+		print("*  You have completed the firework show with a score of {}.  *".format(len(game.play)))
+		print("**************************************************************\n")
 	else:
 		print("Whoa whoa WHOA. You should NOT be seeing this!")
 		

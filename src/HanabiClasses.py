@@ -770,11 +770,13 @@ class HanabiGame(object):
 	def write_state(self,player):
 		ws = open(player.fref,"w")
 		ws.truncate()
-		ws.write("Clocks: {}\n".format(self.clocks))
+		ws.write("Clocks: {}".format(self.clocks))
+		ws.write("Bombs: {}".format(self.bombs))
 		
-		ws.write("Bombs: {}\n".format(self.bombs))
-		
-		ws.write("Cards in deck: {}\n\n".format(len(self.decks["game_deck"])))
+		ws.write("Cards in deck (incl. blanks): {}".format(len(self.decks["game_deck"])))
+		if self.final_countdown > 0:
+			ws.write("Final countdown: {}".format(len(self.players) - self.final_countdown))
+		ws.write("\n")
 		
 		for dude in self.players_initial:
 			if dude.name == player.name:
@@ -792,9 +794,12 @@ class HanabiGame(object):
 	
 	def write_all_states(self):
 		if self.depth == 0:
-			print("Clocks: {}\n".format(self.clocks))
-			print("Bombs: {}\n".format(self.bombs))		
-			print("Cards in deck: {}\n\n".format(len(self.decks["game_deck"])))
+			print("Clocks: {}".format(self.clocks))
+			print("Bombs: {}".format(self.bombs))		
+			print("Cards in deck (incl. blanks): {}".format(len(self.decks["game_deck"])))
+			if self.final_countdown > 0:
+				print("Final countdown: {}".format(len(self.players) - self.final_countdown))
+			print("\n")
 			print(self.play)
 			print(self.discard)
 		for dude in self.players:
