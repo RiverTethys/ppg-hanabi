@@ -341,14 +341,14 @@ class HanabiEvent(object):
 def create_all_choices(player,game):
 	allc = []
 	#Create plays and discards
-	p = [Choice(action = "Play",pos = x+1) for x in range(game.variant.handsize)]
-	d = [Choice(action = "Discard",pos = x+1) for x in range(game.variant.handsize)]
+	p = [Choice(action = "Play",pos = x+1) for x in range(game.variant.handsize) if game.decks[player.name].deck[-x].color != "D"]
+	d = [Choice(action = "Discard",pos = x+1) for x in range(game.variant.handsize) if game.decks[player.name].deck[-x].color != "D"]
 	#Create clues
 	c = []
 	for pl in game.players:
 		if pl.name != player.name:
-			c = c + [Choice(action = "Clue",tgt = pl.name,color = cl) for cl in game.colors]
-			c = c + [Choice(action = "Clue",tgt = pl.name,number = nm) for nm in game.numbers]
+			c = c + [Choice(action = "Clue",tgt = pl.name,color = cl) for cl in game.colors if cl != "D"]
+			c = c + [Choice(action = "Clue",tgt = pl.name,number = nm) for nm in game.numbers if nm != 1000]
 	allc = p + d + c
 	return allc
 	
