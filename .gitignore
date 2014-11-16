@@ -225,5 +225,3 @@ src/miniboa/miniboa/.svn/all-wcprops
 src/clienttest.py
 src/servertest.py
 src/Hanabi_Progress_AI_Section.py
-*.hanabilog
-*.hanabilog
