@@ -187,7 +187,7 @@ class DeductionBot(object):
 				return
 			if bit.spin =="pos" and bit.type == "confirmed": # check if there's a confirmed positive
 				Fbit = Hanabit("confirmed","color",bit.value,"final",table)
-				table.add_bit(FBit,card)
+				table.add_bit(Fbit,card)
 				return
 		#deduce negative information
 		known_number_list = [bit.value for bit in bit_folder.quality_pile["number"] if bit.type == "confirmed" and bit.spin == "final"]
@@ -201,7 +201,7 @@ class DeductionBot(object):
 		x = self.negative_info_elim(bit_folder.quality_pile["color"],bit_folder.values["color"])
 		if x[0]:
 			Fbit = Hanabit("confirmed","color",x[1],"final",table)
-			table.add_bit(FBit,card)
+			table.add_bit(Fbit,card)
 			return
 	
 	def deduce_number(self,card,table):

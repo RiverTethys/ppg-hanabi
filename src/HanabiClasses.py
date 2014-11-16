@@ -860,9 +860,7 @@ class Tricorder(object):
 		return EventList
 	
 	def update_table(self,game):
-		self.tab.update_location_list(game)
-		self.tab.update_positions(game)
-		self.tab.update_critical_list()
+		self.tab.update_all_lists(game)
 		self.bot.update_playability(self.tab,game)
 		self.bot.update_discardability(self.tab)
 		self.bot.update_color(self.tab)
@@ -1033,6 +1031,7 @@ class BitTable(object):
 		#only adds it if it isn't contradicted or made redundant by a confirmed bit
 		x = self.list[card]
 		folder = x.folder
+		
 		for bit in folder[tail.quality][tail.value]:
 			#should only add bits with "final" spin when one isn't already there
 			if bit.spin == "final":
@@ -1043,6 +1042,7 @@ class BitTable(object):
 				elif tail.spin == "neg":
 					print("{}: Uh oh. This contradicts some final information.".format(self.name))
 					print(tail)
+					#print(folder)
 					#takeonefortheteam
 					return
 					
@@ -1075,6 +1075,8 @@ class BitTable(object):
 						elif tail.spin == "neg":
 							confirm_string = "is NOT"
 						print("{}: I already confirmed that {} {} {}.".format(self.name,card,confirm_string,tail.value))
+						print(folder)
+						breakforme
 						return			
 		#DO WE NEED ANY MORE SAFETIES HERE??
 		#Things like being rainbow when it's already negative for another color should be controlled by the game code/logic, not this mechanism
@@ -1118,13 +1120,9 @@ class BitTable(object):
 			return True
 		return False		
 	
-	
 	def fixed(self,card):
-		for bit in self.list[card].pile:
-			if bit.spin == "final" and bit.quality == "color":
-				for bit in self.list[card].pile:
-					if bit.spin == "final" and bit.quality == "number":
-						return True
+		if self.final(card,"color") and self.final(card,"number"):
+			return True
 		return False
 		
 	
@@ -1143,9 +1141,7 @@ class BitTable(object):
 					self.new_position(card,p.name,game)
 			if (not in_some_hand):
 				if self.final(card,"position"):
-					self.list[card].clear(cquality = "position")
-			
-			
+					self.list[card].clear(cquality = "position")	
 	
 	def new_location(self,card,location_name,game):
 		if card in self.location[self.name]: #should already be done when card is played/discarded, but just in case
@@ -1162,13 +1158,6 @@ class BitTable(object):
 				self.discard_q.append(card)	
 			self.add_bit(Hanabit("default","discardability","discardable","default",self),card)
 	
-	def update_location_list(self,game):
-		self.location = {location.name: {card: self.list[card] for card in location.deck if card.color in self.decktemplate.colors} 
-		                                for deckname, location in game.decks.items()}
-	
-	def update_critical_list(self):
-		self.critical = {card: self.list[card]  for card in self.list if ( not self.gone(card) and self.only_one(card.color,card.number))}
-	
 	def new_visible(self,card,location,game):
 		if not self.final(card,"color"):
 			color_bit = Hanabit("confirmed","color",card.color,"final",self)
@@ -1178,12 +1167,21 @@ class BitTable(object):
 			self.add_bit(number_bit,card)
 		self.new_location(card,location,game)
 	
+	def update_location_list(self,game):
+		self.location = {location.name: {card: self.list[card] for card in location.deck if card.color in self.decktemplate.colors} 
+		                                for deckname, location in game.decks.items()}
+	
+	def update_critical_list(self):
+		self.critical = {card: self.list[card]  for card in self.list if ( not self.gone(card) and self.only_one(card.color,card.number))}
+	
+	def update_known_list(self):
+		self.known = {card: self.list[card] for card in self.list if self.fixed(card)}
+	
 	def update_all_lists(self,game):
 		self.update_location_list(game)
+		self.update_positions(game)
 		self.update_critical_list()
-		
-	
-
+		self.update_known_list()
 	
 	def make_short_list(self,type,quality,value,spin): #works like the make_pile in BitFolder
 		temp_dict = {}
@@ -1201,18 +1199,6 @@ class BitTable(object):
 	#def make_short_dict(self,type,quality,value,spin,indices): #for cooler looping maybe someday
 	
 		
-	def read_deck(self,name):
-		pass		
-		
-	def tag(self,thing,type,quality,value,spin): 
-		bit = Hanabit(type,quality,value,spin,self)
-		self.list[thing].folder[quality][value].append(bit)
-
-	def edit_bits(self):
-		pass
-
-	def update_knowledge(self):
-		pass
 
 class Choice(object):
 	def __init__(self,action=None,tgt=None,color=None,number=None,pos=None):
