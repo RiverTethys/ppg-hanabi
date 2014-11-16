@@ -1042,17 +1042,17 @@ class BitTable(object):
 					return
 					
 				else:
-					print("{}: It was already final that this card is {}.".format(self.name,bit.value))
+					print("{}: It was already final that {} is {}.".format(self.name,card,bit.value))
 					return
 			
 			if bit.type == "confirmed":
 				if tail.spin == "pos" and bit.spin == "neg":
-					print("{}: Thought for a second that the card WAS {}  when in fact it was already NOT {}.".format(self.name,tail.value,bit.value))
+					print("{}: Thought for a second that {} WAS {}  when in fact it was already NOT {}.".format(self.name,card,tail.value,bit.value))
 					if tail.type == "inkling":
 						print("But it was just an inkling.")
 					return
 				elif tail.spin == "neg" and bit.spin == "pos":
-					print("{}: Thought for a second that the card was NOT {}  when in fact it was already WAS {}.".format(self.name,tail.value,bit.value))
+					print("{}: Thought for a second that {} was NOT {}  when in fact it was already WAS {}.".format(self.name,card,tail.value,bit.value))
 					if tail.type == "inkling":
 						print("But it was just an inkling.")
 					return
@@ -1062,14 +1062,14 @@ class BitTable(object):
 							confirm_string = "IS"
 						elif tail.spin == "neg":
 							confirm_string = "is NOT"
-						print("{}: Inkling already confirmed, this card {} {}.".format(self.name,confirm_string,tail.value))
+						print("{}: Inkling already confirmed, {} {} {}.".format(self.name,card,confirm_string,tail.value))
 						return
 					if tail.type == "confirmed":
 						if tail.spin == "pos":
 							confirm_string = "IS"
 						elif tail.spin == "neg":
 							confirm_string = "is NOT"
-						print("{}: I already confirmed that this card {} {}.".format(self.name,confirm_string,tail.value))
+						print("{}: I already confirmed that {} {} {}.".format(self.name,card,confirm_string,tail.value))
 						return			
 		#DO WE NEED ANY MORE SAFETIES HERE??
 		#Things like being rainbow when it's already negative for another color should be controlled by the game code/logic, not this mechanism
