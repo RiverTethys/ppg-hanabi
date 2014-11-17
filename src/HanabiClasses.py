@@ -1049,16 +1049,24 @@ class BitTable(object):
 					return
 			
 			if bit.type == "confirmed":
-				if tail.spin == "pos" and bit.spin == "neg":
-					print("{}: Thought for a second that {} WAS {}  when in fact it was already NOT {}.".format(self.name,card,tail.value,bit.value))
-					if tail.type == "inkling":
-						print("But it was just an inkling.")
-					return
+				if tail.spin == "pos" and bit.spin == "neg" :
+					if (tail.quality =="color" or tail.quality =="number"):
+						print("{}: Thought for a second that {} WAS {}  when in fact it was already NOT {}.".format(self.name,card,tail.value,bit.value))
+						if tail.type == "inkling":
+							print("But it was just an inkling.")
+						return
+					else:
+						x.remove_bit(bit)
+						print("This is fixed ish, but we should check that these deductions switch for a reason")
 				elif tail.spin == "neg" and bit.spin == "pos":
-					print("{}: Thought for a second that {} was NOT {}  when in fact it was already WAS {}.".format(self.name,card,tail.value,bit.value))
-					if tail.type == "inkling":
-						print("But it was just an inkling.")
-					return
+					if (tail.quality =="color" or tail.quality =="number"):
+						print("{}: Thought for a second that {} was NOT {}  when in fact it was already WAS {}.".format(self.name,card,tail.value,bit.value))
+						if tail.type == "inkling":
+							print("But it was just an inkling.")
+						return
+					else:
+						x.remove_bit(bit)
+						print("This is fixed ish, but we should check that these deductions switch for a reason")
 				elif tail.spin == bit.spin:
 					if tail.type == "inkling":
 						if tail.spin == "pos":
