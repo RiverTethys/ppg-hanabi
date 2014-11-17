@@ -106,6 +106,8 @@ def print_table_list(games,game_name,player_name,type,quality,value,spin):
 
 
 def turn(games):
+	for each_game in games:
+		each_game.update_all_tables()
 	active_player = games[0].players[0]
 	print("{}'s turn:\n".format(active_player.name))
 	dec = active_player.decision(games[0])
@@ -114,7 +116,7 @@ def turn(games):
 		print(dec.id)
 		each_game.action(dec)
 	
-	if (len(games[0].decks["game_deck"]) == 0):
+	if (len(games[0].decks["game_deck"]) == 0 ):
 		games[0].inc_fc()
 	if (games[0].final_countdown > len(games[0].players)):
 		games[0].victory = True
@@ -136,7 +138,8 @@ def initialize_hanabi():  ##Separated so that we can test things more easily on 
 	CARD_COLORS = ['R','Y','G','B','W']
 	CARD_NUMBERS = [1,2,3,4,5]
 	#deck_template = HanabiDeckTemplate(CARD_COLORS,CARD_NUMBERS,{x:{1:3,2:2,3:2,4:2,5:1} for x in ('R','Y','G','B','W','H')})
-	deck_template = HanabiDeckTemplate(CARD_COLORS,CARD_NUMBERS,{x:{1:3,2:2,3:2,4:2,5:1} for x in ('R','Y','G','B','W')})
+	distr = {x:{1:3,2:2,3:2,4:2,5:1} for x in ('R','Y','G','B','W')}
+	deck_template = HanabiDeckTemplate(CARD_COLORS,CARD_NUMBERS,distr)
 	
 	##(playernum,handsize,deck_template,[])
 	variant = HanabiVariant(4,4,deck_template,[])
@@ -207,7 +210,9 @@ def play_hanabi():
 	if game.defeat:
 		print("YOU'VE FAILED!")
 	elif game.victory:
-		print("You have completed the firework show with a score of {}.".format(len(game.play)))
+		print("\n**************************************************************")
+		print("*  You have completed the firework show with a score of {}.  *".format(len(game.play)))
+		print("**************************************************************\n")
 	else:
 		print("Whoa whoa WHOA. You should NOT be seeing this!")
 		

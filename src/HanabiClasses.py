@@ -52,7 +52,7 @@ class Deck(object):
 		
 	def build_deck(self):
 		deck = []
-		card_id = 0	
+		card_id = 1	
 		for color in self.distr:
 			for num in self.distr[color]:
 				for i in range(self.distr[color][num]):
@@ -62,7 +62,7 @@ class Deck(object):
 		
 	def build_deck_from_file(self,deckfile):
 		deck = []
-		card_id = 0
+		card_id = 1
 		with open(deckfile) as fileref:
 			for cl in fileref:
 				m = re.search('^([12345])([BGRWY])$',cl)
@@ -186,9 +186,9 @@ class Player(object):
 	
 	def draw(self,game,deck):
 		card = game.draw_card(deck)
-		game.decks[self.name].deck.append(card)
-		#update tables
 		if card:
+			game.decks[self.name].deck.append(card)
+		#update tables
 			for dude in game.players:
 				if dude.name == self.name:
 					dude.trike.tab.new_location(card,self.name,game)
@@ -347,8 +347,8 @@ def create_all_choices(player,game):
 	c = []
 	for pl in game.players:
 		if pl.name != player.name:
-			c = c + [Choice(action = "Clue",tgt = pl.name,color = cl) for cl in game.colors]
-			c = c + [Choice(action = "Clue",tgt = pl.name,number = nm) for nm in game.numbers]
+			c = c + [Choice(action = "Clue",tgt = pl.name,color = cl) for cl in game.colors if cl != "H"]
+			c = c + [Choice(action = "Clue",tgt = pl.name,number = nm) for nm in game.numbers if nm != 1000]
 	allc = p + d + c
 	return allc
 	
@@ -385,33 +385,67 @@ def eval_flow(player,game):
 	print (chs)
 	clocks_are_low = (game.MAX_CLOCKS/2) - game.clocks
 	# go through the hand. score playables, score others as discardable
-	for enum, c in enumerate(game.decks[player.name].deck):
-		if player.trike.tab.list[c].query_bit_pile(qtype=["confirmed","conventional"] 
+	
+	for i in chs:
+		if i.action =="Play":
+			i.bump(-(i.pos))
+			c = pos_to_card(player,i.pos)
+			if player.trike.tab.list[c].query_bit_pile(qtype=["confirmed"] 
 											  ,qquality=["playability"]
 											  ,qvalue=["playable"]
-											  ,qspin=["pos","final"]):
-			for i in chs:
-				if i.action == "Play" and i.pos == (len(game.decks[player.name].deck) - enum):
-					i.bump(10)
-		elif player.trike.tab.list[c].query_bit_pile(qtype=["default","conventional"] 
+											  ,qspin=["final"]):
+				i.bump(18)
+			elif player.trike.tab.list[c].query_bit_pile(qtype=["confirmed","conventional"] 
+											  ,qquality=["playability"]
+											  ,qvalue=["playable"]
+											  ,qspin=["pos"]):
+				i.bump(14)							  
+	
+	# for enum, c in enumerate(game.decks[player.name].deck):
+		# if player.trike.tab.list[c].query_bit_pile(qtype=["confirmed"] 
+											  # ,qquality=["playability"]
+											  # ,qvalue=["playable"]
+											  # ,qspin=["pos","final"]):
+			# for i in chs:
+				# if i.action == "Play" and i.pos == (len(game.decks[player.name].deck) - enum):
+					# i.bump(10)
+		
+		
+		elif i.action == "Discard":
+			c = pos_to_card(player,i.pos)
+			i.bump(i.pos)
+			if player.trike.tab.list[c].query_bit_pile(qtype=["default","conventional","confirmed"] 
 											    ,qquality=["discardability"]
 											    ,qvalue=["discardable"]
-												,qspin=["default","pos","final"]):
-			for i in chs:
-				if i.action == "Discard" and i.pos == (len(game.decks[player.name].deck) - enum):
-					if len(game.past_log) > game.variant.playernum:
-						for num, elt in enumerate(player.trike.tab.discard_q):
-							if elt == c:
-								qpos = num
+												,qspin=["final","pos","default"]):
+				
+				if len(game.past_log) > game.variant.playernum:
+						for num, card_in_q in enumerate(player.trike.tab.discard_q):
+							if card_in_q == c:
+								q_posit = num
+								adjustment = - q_posit
 								if clocks_are_low < 0: ### seeing if this corrects the early discarding
-									qpos += 2
-						i.bump(1 + len(player.trike.tab.discard_q) - qpos) 
-					else:
-						i.bump(-10000)
-	# evaluate clues based on type of clue theyll think it is
-	for i in chs:
-		if i.action == "Clue":
+									adjustment -= 9
+								elif game.clocks == 1:
+									adjustment +=1
+								elif game.clocks == 0:
+									adjustment +=3
+								
+								i.bump(adjustment)
+						if c not in player.trike.tab.discard_q:
+							i.bump(-5)
+				else:
+					i.bump(-10000)
+			else:
+				i.bump(-game.variant.handsize)
+			
+					
+	# evaluate clues based on type of clue they'll think it is
+	
+		elif i.action == "Clue":
 			if game.clocks > 0:
+				if clocks_are_low <0:
+					i.bump(2)
 				if game.clocks == 1: ##mild disincentive to cluing when clues are very low
 					i.bump(-1)
 				pred = game.con.predict_clue(event_from_choice(i,player,game),ikyk(game,player.name,i.tgt),game)
@@ -420,13 +454,13 @@ def eval_flow(player,game):
 				if pred == "recently given":
 					i.bump(-10)
 				elif pred == "playing":
-					i.bump(9)
+					i.bump(10)
 				elif pred == "bombing":
-					i.bump(-10)
+					i.bump(-15)
 				elif pred == "protective":
 					i.bump(8)
 				elif pred == "dud":
-					i.bump(-1)
+					i.bump(1)
 				#these ones are just not implemented yet...
 				elif pred == "multi-play":
 					i.bump(-10)
@@ -519,11 +553,12 @@ class HanabiGame(object):
 	
 	def set_game_deck(self,deckfile=None):
 		self.add_card_list(HanabiGameDeck("card_list",self.variant, self.variant.decktemplate,deckfile=deckfile))
-		game_deck = HanabiGameDeck("game_deck",self.variant,self.variant.decktemplate,deckfile=deckfile)
+		game_deck = HanabiGameDeck("game_deck",self.variant,self.variant.decktemplate,deckfile=deckfile)		
 		if self.depth == 0:
 			game_deck.print_distr()
 		if not deckfile:
 			game_deck.shuffle()
+		
 		initial_game_deck = deepcopy(game_deck)
 		self.add_initial_game_deck(initial_game_deck)
 		self.add_deck(game_deck)
@@ -733,11 +768,13 @@ class HanabiGame(object):
 	def write_state(self,player):
 		ws = open(player.fref,"w")
 		ws.truncate()
-		ws.write("Clocks: {}\n".format(self.clocks))
+		ws.write("Clocks: {}".format(self.clocks))
+		ws.write("Bombs: {}".format(self.bombs))
 		
-		ws.write("Bombs: {}\n".format(self.bombs))
-		
-		ws.write("Cards in deck: {}\n\n".format(len(self.decks["game_deck"])))
+		ws.write("Cards in deck (incl. blanks): {}".format(len(self.decks["game_deck"])))
+		if self.final_countdown > 0:
+			ws.write("Final countdown: {}".format(len(self.players) - self.final_countdown))
+		ws.write("\n")
 		
 		for dude in self.players_initial:
 			if dude.name == player.name:
@@ -755,9 +792,12 @@ class HanabiGame(object):
 	
 	def write_all_states(self):
 		if self.depth == 0:
-			print("Clocks: {}\n".format(self.clocks))
-			print("Bombs: {}\n".format(self.bombs))		
-			print("Cards in deck: {}\n\n".format(len(self.decks["game_deck"])))
+			print("Clocks: {}".format(self.clocks))
+			print("Bombs: {}".format(self.bombs))		
+			print("Cards in deck (incl. blanks): {}".format(len(self.decks["game_deck"])))
+			if self.final_countdown > 0:
+				print("Final countdown: {}".format(len(self.players) - self.final_countdown))
+			print("\n")
 			print(self.play)
 			print(self.discard)
 		for dude in self.players:
@@ -818,9 +858,7 @@ class Tricorder(object):
 		return EventList
 	
 	def update_table(self,game):
-		self.tab.update_location_list(game)
-		self.tab.update_positions(game)
-		self.tab.update_critical_list()
+		self.tab.update_all_lists(game)
 		self.bot.update_playability(self.tab,game)
 		self.bot.update_discardability(self.tab)
 		self.bot.update_color(self.tab)
@@ -991,6 +1029,7 @@ class BitTable(object):
 		#only adds it if it isn't contradicted or made redundant by a confirmed bit
 		x = self.list[card]
 		folder = x.folder
+		
 		for bit in folder[tail.quality][tail.value]:
 			#should only add bits with "final" spin when one isn't already there
 			if bit.spin == "final":
@@ -1001,22 +1040,33 @@ class BitTable(object):
 				elif tail.spin == "neg":
 					print("{}: Uh oh. This contradicts some final information.".format(self.name))
 					print(tail)
+					#print(folder)
+					#takeonefortheteam
 					return
+					
 				else:
 					print("{}: It was already final that {} is {}.".format(self.name,card,bit.value))
 					return
 			
 			if bit.type == "confirmed":
-				if tail.spin == "pos" and bit.spin == "neg":
-					print("{}: Thought for a second that {} WAS {}  when in fact it was already NOT {}.".format(self.name,card,tail.value,bit.value))
-					if tail.type == "inkling":
-						print("But it was just an inkling.")
-					return
+				if tail.spin == "pos" and bit.spin == "neg" :
+					if (tail.quality =="color" or tail.quality =="number"):
+						print("{}: Thought for a second that {} WAS {}  when in fact it was already NOT {}.".format(self.name,card,tail.value,bit.value))
+						if tail.type == "inkling":
+							print("But it was just an inkling.")
+						return
+					else:
+						x.remove_bit(bit)
+						print("This is fixed ish, but we should check that these deductions switch for a reason")
 				elif tail.spin == "neg" and bit.spin == "pos":
-					print("{}: Thought for a second that {} was NOT {}  when in fact it was already WAS {}.".format(self.name,card,tail.value,bit.value))
-					if tail.type == "inkling":
-						print("But it was just an inkling.")
-					return
+					if (tail.quality =="color" or tail.quality =="number"):
+						print("{}: Thought for a second that {} was NOT {}  when in fact it was already WAS {}.".format(self.name,card,tail.value,bit.value))
+						if tail.type == "inkling":
+							print("But it was just an inkling.")
+						return
+					else:
+						x.remove_bit(bit)
+						print("This is fixed ish, but we should check that these deductions switch for a reason")
 				elif tail.spin == bit.spin:
 					if tail.type == "inkling":
 						if tail.spin == "pos":
@@ -1031,6 +1081,8 @@ class BitTable(object):
 						elif tail.spin == "neg":
 							confirm_string = "is NOT"
 						print("{}: I already confirmed that {} {} {}.".format(self.name,card,confirm_string,tail.value))
+						print(folder)
+						#breakforme
 						return			
 		#DO WE NEED ANY MORE SAFETIES HERE??
 		#Things like being rainbow when it's already negative for another color should be controlled by the game code/logic, not this mechanism
@@ -1074,13 +1126,9 @@ class BitTable(object):
 			return True
 		return False		
 	
-	
 	def fixed(self,card):
-		for bit in self.list[card].pile:
-			if bit.spin == "final" and bit.quality == "color":
-				for bit in self.list[card].pile:
-					if bit.spin == "final" and bit.quality == "number":
-						return True
+		if self.final(card,"color") and self.final(card,"number"):
+			return True
 		return False
 		
 	
@@ -1099,9 +1147,7 @@ class BitTable(object):
 					self.new_position(card,p.name,game)
 			if (not in_some_hand):
 				if self.final(card,"position"):
-					self.list[card].clear(cquality = "position")
-			
-			
+					self.list[card].clear(cquality = "position")	
 	
 	def new_location(self,card,location_name,game):
 		if card in self.location[self.name]: #should already be done when card is played/discarded, but just in case
@@ -1118,13 +1164,6 @@ class BitTable(object):
 				self.discard_q.append(card)	
 			self.add_bit(Hanabit("default","discardability","discardable","default",self),card)
 	
-	def update_location_list(self,game):
-		self.location = {location.name: {card: self.list[card] for card in location.deck} 
-		                                for deckname, location in game.decks.items()}
-	
-	def update_critical_list(self):
-		self.critical = {card: self.list[card]  for card in self.list if ( not self.gone(card) and self.only_one(card.color,card.number))}
-	
 	def new_visible(self,card,location,game):
 		if not self.final(card,"color"):
 			color_bit = Hanabit("confirmed","color",card.color,"final",self)
@@ -1134,12 +1173,21 @@ class BitTable(object):
 			self.add_bit(number_bit,card)
 		self.new_location(card,location,game)
 	
+	def update_location_list(self,game):
+		self.location = {location.name: {card: self.list[card] for card in location.deck} 
+		                                for deckname, location in game.decks.items()}
+	
+	def update_critical_list(self):
+		self.critical = {card: self.list[card]  for card in self.list if ( not self.gone(card) and self.only_one(card.color,card.number))}
+	
+	def update_known_list(self):
+		self.known = {card: self.list[card] for card in self.list if self.fixed(card)}
+	
 	def update_all_lists(self,game):
 		self.update_location_list(game)
+		self.update_positions(game)
 		self.update_critical_list()
-		
-	
-
+		self.update_known_list()
 	
 	def make_short_list(self,type,quality,value,spin): #works like the make_pile in BitFolder
 		temp_dict = {}
@@ -1157,18 +1205,6 @@ class BitTable(object):
 	#def make_short_dict(self,type,quality,value,spin,indices): #for cooler looping maybe someday
 	
 		
-	def read_deck(self,name):
-		pass		
-		
-	def tag(self,thing,type,quality,value,spin): 
-		bit = Hanabit(type,quality,value,spin,self)
-		self.list[thing].folder[quality][value].append(bit)
-
-	def edit_bits(self):
-		pass
-
-	def update_knowledge(self):
-		pass
 
 class Choice(object):
 	def __init__(self,action=None,tgt=None,color=None,number=None,pos=None):
