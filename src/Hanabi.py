@@ -116,7 +116,7 @@ def turn(games):
 		print(dec.id)
 		each_game.action(dec)
 	
-	if (len(games[0].decks["game_deck"]) < 10 and set(games[0].decks["game_deck"].deck) == set([Card(1000,"D",1000)])):
+	if (len(games[0].decks["game_deck"]) == 0 ):
 		games[0].inc_fc()
 	if (games[0].final_countdown > len(games[0].players)):
 		games[0].victory = True
@@ -135,11 +135,10 @@ def write_data(games):
 	
 def initialize_hanabi():  ##Separated so that we can test things more easily on the command line
 	#CARD_COLORS = ['R','Y','G','B','W','H']
-	CARD_COLORS = ['R','Y','G','B','W','D']
-	CARD_NUMBERS = [1,2,3,4,5,1000]
+	CARD_COLORS = ['R','Y','G','B','W']
+	CARD_NUMBERS = [1,2,3,4,5]
 	#deck_template = HanabiDeckTemplate(CARD_COLORS,CARD_NUMBERS,{x:{1:3,2:2,3:2,4:2,5:1} for x in ('R','Y','G','B','W','H')})
-	distr = {x:{1:3,2:2,3:2,4:2,5:1,1000:0} for x in ('R','Y','G','B','W')}
-	distr['D'] = {1:0,2:0,3:0,4:0,5:0,1000:0}
+	distr = {x:{1:3,2:2,3:2,4:2,5:1} for x in ('R','Y','G','B','W')}
 	deck_template = HanabiDeckTemplate(CARD_COLORS,CARD_NUMBERS,distr)
 	
 	##(playernum,handsize,deck_template,[])

@@ -186,9 +186,9 @@ class Player(object):
 	
 	def draw(self,game,deck):
 		card = game.draw_card(deck)
-		game.decks[self.name].deck.append(card)
-		#update tables
 		if card:
+			game.decks[self.name].deck.append(card)
+		#update tables
 			for dude in game.players:
 				if dude.name == self.name:
 					dude.trike.tab.new_location(card,self.name,game)
@@ -341,13 +341,13 @@ class HanabiEvent(object):
 def create_all_choices(player,game):
 	allc = []
 	#Create plays and discards
-	p = [Choice(action = "Play",pos = x+1) for x in range(game.variant.handsize) if game.decks[player.name].deck[-x].color != "D"]
-	d = [Choice(action = "Discard",pos = x+1) for x in range(game.variant.handsize) if game.decks[player.name].deck[-x].color != "D"]
+	p = [Choice(action = "Play",pos = x+1) for x in range(game.variant.handsize)]
+	d = [Choice(action = "Discard",pos = x+1) for x in range(game.variant.handsize)]
 	#Create clues
 	c = []
 	for pl in game.players:
 		if pl.name != player.name:
-			c = c + [Choice(action = "Clue",tgt = pl.name,color = cl) for cl in game.colors if cl != "D"]
+			c = c + [Choice(action = "Clue",tgt = pl.name,color = cl) for cl in game.colors if cl != "H"]
 			c = c + [Choice(action = "Clue",tgt = pl.name,number = nm) for nm in game.numbers if nm != 1000]
 	allc = p + d + c
 	return allc
@@ -558,8 +558,6 @@ class HanabiGame(object):
 			game_deck.print_distr()
 		if not deckfile:
 			game_deck.shuffle()
-		last_round_cushion = [Card(1000,"D",1000) for x in range(self.variant.playernum + 1)]
-		game_deck.deck = last_round_cushion + game_deck.deck
 		
 		initial_game_deck = deepcopy(game_deck)
 		self.add_initial_game_deck(initial_game_deck)
@@ -980,7 +978,7 @@ class BitTable(object):
 			self.name = pl
 		else:
 			self.name = "None"
-		self.list = {card: BitFolder(game,card) for card in game.initial_game_deck.deck}
+		self.list = {card: BitFolder(game,card) for card in game.card_list.deck}
 		self.current_list = self.list
 		
 		# for debugging
@@ -1011,7 +1009,7 @@ class BitTable(object):
 	#		else:
 	#			print(r)
 			
-		self.location = {location.name: {card: self.list[card] for card in location.deck if card.color in self.decktemplate.colors} 
+		self.location = {location.name: {card: self.list[card] for card in location.deck} 
 		                                for deckname, location in game.decks.items()}
 		self.known = {card: self.list[card] for card in self.list if self.fixed(card)}
 		self.critical = {card: self.list[card]  for card in self.list if self.only_one(card.color,card.number)}
@@ -1076,7 +1074,7 @@ class BitTable(object):
 							confirm_string = "is NOT"
 						print("{}: I already confirmed that {} {} {}.".format(self.name,card,confirm_string,tail.value))
 						print(folder)
-						breakforme
+						#breakforme
 						return			
 		#DO WE NEED ANY MORE SAFETIES HERE??
 		#Things like being rainbow when it's already negative for another color should be controlled by the game code/logic, not this mechanism
@@ -1168,7 +1166,7 @@ class BitTable(object):
 		self.new_location(card,location,game)
 	
 	def update_location_list(self,game):
-		self.location = {location.name: {card: self.list[card] for card in location.deck if card.color in self.decktemplate.colors} 
+		self.location = {location.name: {card: self.list[card] for card in location.deck} 
 		                                for deckname, location in game.decks.items()}
 	
 	def update_critical_list(self):
