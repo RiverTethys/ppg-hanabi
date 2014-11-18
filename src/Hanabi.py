@@ -216,11 +216,26 @@ def play_hanabi():
 	else:
 		print("Whoa whoa WHOA. You should NOT be seeing this!")
 		
-	for elt in game.past_log:
-		print(elt)
 	logref = open("HanabiLog.hanabilog","w")
-	for elt in game.past_log:
-		logref.write(str(elt)+"\n")
+	response = input("\nSave this game's deck? (y/n) ")
+	if response.upper() == "Y":
+		newscript = open("newscript.hanabiscript","w")
+		newdeck = open("newdeck.hanabideck","w")
+		for elt in game.past_log:
+			print(elt)
+			logref.write(str(elt)+"\n")
+			#write the event in script format.
+			#probably requires that Events track
+			#hand position for plays/discards.
+		newscript.close()
+		for card in game.initial_game_deck.deck:
+			newdeck.write("{}".format(card))
+		newdeck.close()
+		print("Remember to rename the new deck file if you want to keep it.")
+	else:
+		for elt in game.past_log:
+			print(elt)
+			logref.write(str(elt)+"\n")
 	logref.close()
 		
 if __name__ == "__main__":		

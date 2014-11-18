@@ -553,7 +553,7 @@ class HanabiGame(object):
 	
 	def set_game_deck(self,deckfile=None):
 		self.add_card_list(HanabiGameDeck("card_list",self.variant, self.variant.decktemplate,deckfile=deckfile))
-		game_deck = HanabiGameDeck("game_deck",self.variant,self.variant.decktemplate,deckfile=deckfile)		
+		game_deck = HanabiGameDeck("game_deck",self.variant,self.variant.decktemplate,deckfile=deckfile)
 		if self.depth == 0:
 			game_deck.print_distr()
 		if not deckfile:
