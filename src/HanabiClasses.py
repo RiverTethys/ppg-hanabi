@@ -208,10 +208,10 @@ class Player(object):
 		current_event = game.future_log.popleft()
 		if (action=='a' or action=='A'):
 			a = game.decks[self.name].deck[-position]
-			current_event.make_play(self.name,a.id,a.color,a.number)
+			current_event.make_play(self.name,position,a.id,a.color,a.number)
 		elif (action=='d' or action=='D'):
 			d = game.decks[self.name].deck[-position]
-			current_event.make_discard(self.name,d.id,d.color,d.number)
+			current_event.make_discard(self.name,position,d.id,d.color,d.number)
 		elif (action == 'c' or action == 'C'):
 			if color and color != "x":
 				current_event.make_clue(self.name
@@ -277,21 +277,24 @@ class Player(object):
 					break
 					
 			elif (action=='a' or action=='A'):
-				a = game.decks[self.name].deck[-int(input("Which card? 1=newest,{}=oldest\n".format(game.variant.handsize)))]
-				current_event.make_play(self.name,a.id,a.color,a.number)
+				pos = int(input("Which card? 1=newest,{}=oldest\n".format(game.variant.handsize)))
+				a = game.decks[self.name].deck[-pos]
+				current_event.make_play(self.name,pos,a.id,a.color,a.number)
 				break
 				
 			elif (action=='d' or action=='D'):
-				d = game.decks[self.name].deck[-int(input("Which card? 1=newest,{}=oldest\n".format(game.variant.handsize)))]
-				current_event.make_discard(self.name,d.id,d.color,d.number)
+				pos = int(input("Which card? 1=newest,{}=oldest\n".format(game.variant.handsize)))
+				d = game.decks[self.name].deck[-pos]
+				current_event.make_discard(self.name,pos,d.id,d.color,d.number)
 				break
 		return current_event
 		
 class HanabiEvent(object):
-	def __init__(self,src,tgt,type,id,color,number):
+	def __init__(self,src,tgt,type,pos,id,color,number):
 		self.src = src
 		self.tgt = tgt
 		self.type = type # "Play", "Discard", or "Clue"
+		self.pos = pos
 		self.id = id
 		self.color = color
 		self.number = number
@@ -312,7 +315,7 @@ class HanabiEvent(object):
 				else:
 					repstr += "... about what, we may never know."
 			else:
-				repstr += "{}{}.".format(self.number,self.color)
+				repstr += "{}{} (position {}).".format(self.number,self.color,self.pos)
 				if self.bomb:
 					repstr += " Regrettably."
 		return repstr
@@ -324,14 +327,14 @@ class HanabiEvent(object):
 		self.color = color
 		self.number = number
 
-	def make_play(self,src,id,color,number):
+	def make_play(self,src,pos,id,color,number):
 		self.src = src
 		self.type = "Play"
 		self.id = id
 		self.color = color
 		self.number = number
 
-	def make_discard(self,src,id,color,number):
+	def make_discard(self,src,pos,id,color,number):
 		self.src = src
 		self.type = "Discard"
 		self.id = id
@@ -492,7 +495,7 @@ def event_from_choice(choice,player,game):
 	else:
 		card_id = None
 		
-	return HanabiEvent(player.name,choice.tgt,choice.action,card_id,choice.color,choice.number)
+	return HanabiEvent(player.name,choice.tgt,choice.action,choice.pos,card_id,choice.color,choice.number)
 	
 class HanabiNPC(Player):
 	def __init__(self,name,game):
@@ -588,7 +591,7 @@ class HanabiGame(object):
 		MAX_TURNS = NUM_PLAYS_TO_WIN + INITIAL_CLOCKS + NUM_OF_FIVES + 2*(INITIAL_DECK_SIZE - NUM_PLAYS_TO_WIN) - 1 + NUM_PLAYERS
 		
 		#initialize Future Log
-		self.future_log = deque([HanabiEvent(None,None,None,None,None,None) for x in range(MAX_TURNS)])
+		self.future_log = deque([HanabiEvent(None,None,None,None,None,None,None) for x in range(MAX_TURNS)])
 		self.past_log = []
 	
 	def set_conventions(self,conventions):
