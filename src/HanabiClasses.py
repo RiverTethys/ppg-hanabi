@@ -385,38 +385,26 @@ def eval_flow(player,game):
 	if game.depth == 0:
 		eval_flow_base_case(player,game)
 	else:
-		simulate(player,game,game.depth)
+		pass
+		
 
-def simulate(player,game,depth):
+def simulate(player,game,EventList):
+	for p in game.players:
+		p.trike.update_table(game)
 	event = player.decision(game)
+	game.action(event)
+	EventList.append(event)
+	if game.depth == game.total_depth
+		return
+	else:
+		simulate(player,player.trike.game,EventList)
 
-
-def simulate(self,game,EventList,n):
-		decision = self.decide(game)
-		game.take_action(decision)		
-		EventList.append(decision)
-		if n==0:
-			return
-		else:
-			return self.simulate(game,EventList,n-1)
-	
-	def set_conventions(self, conventions):
-		self.con = conventions
-	
-	def run_sim(self,game,action,n):
-		CurrentState = game.past_log
-		game.take_action(action)
-		EventList = [action]
-		self.simulate(game,EventList,n)
-		game.reset(CurrentState)
-		return EventList
 	
 		
 def eval_flow_base_case(player,game):
 	for p in game.players:
 		p.trike.update_table(game)
 	chs = create_all_choices(player,game)
-	print (chs)
 	clocks_are_low = (game.MAX_CLOCKS/2) - game.clocks
 	# go through the hand. score playables, score others as discardable
 	

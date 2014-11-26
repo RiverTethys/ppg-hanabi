@@ -10,7 +10,13 @@ since we will not include multi-play cluing in base case behavior, there will be
 
 
 
-need to initialize tricorders with target game paths so that the trike can find its next simulation level.
+To do:
+Still need to initialize tricorders with target game paths so that the trike can find its next simulation level.
+Need to have simulated games actually take turns as part of the simulation process (make sure all the lower-level games are updating properly and that player order is shifting in each game as appropriate)
+Not sure whether this is going to create all the choices and then loop over them at the top level or whether it's going to be more of a tail recursion, evaluating the event lists as they come up the chain, or both.
+
+Thinking about having a secondary evaluation procedure (takes a list of events and spits out an evaluation), which does require running more sims.   This will be a time vs. easiness to code issue.  Might want to think about alternatives.
+
 then need the recursive code, mimicking a game round.
 then need the garbage collection and/or reset capabilities.
-need to clean up simulation area.
+Might need to clean functions out of the Player/NPC classes or put them back there.
