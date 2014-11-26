@@ -1,0 +1,16 @@
+What's required for interpreting a Multi-Play clue:
+
+Everyone analyzes all clues.
+If a clue is given to someone n spaces away from the source, it's not playable, and it would be playable if some cards (fewer than n) were played in the meantime, then you should try playing an in-between card that you know about in your hand, and if you don't know about any of them, then you go with the newest card that could possibly be that card.  However, if the inbetween card is visible in someone else's hand where they will play it before the clued card, you let them do so.
+
+
+
+What's required for giving/predicting a Multi-Play clue:
+since we will not include multi-play cluing in base case behavior, there will be no need to predict it with flows.  It will merely be "predicted" by the people who see a clue as a multi-play clue and succeed in playing correctly.
+
+
+
+need to initialize tricorders with target game paths so that the trike can find its next simulation level.
+then need the recursive code, mimicking a game round.
+then need the garbage collection and/or reset capabilities.
+need to clean up simulation area.

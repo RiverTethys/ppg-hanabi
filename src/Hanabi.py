@@ -215,7 +215,10 @@ def play_hanabi():
 		print("**************************************************************\n")
 	else:
 		print("Whoa whoa WHOA. You should NOT be seeing this!")
-		
+	
+
+	for elt in game.past_log:
+		print(elt)
 	logref = open("HanabiLog.hanabilog","w")
 	response = input("\nSave this game's deck and log? (y/n) ")
 	if response.upper() == "Y":
@@ -227,7 +230,6 @@ def play_hanabi():
 			name_list.append(p.name)
 		#build script and deck files
 		for elt in game.past_log:
-			print(elt)
 			logref.write(str(elt)+"\n")
 			newscript.write("{}{}{}{}{}\n".format(elt.type[:1].lower()
 			                                     ,elt.pos if elt.pos else 0
@@ -242,7 +244,6 @@ def play_hanabi():
 		print("Remember to rename the new deck file if you want to keep it.")
 	else:
 		for elt in game.past_log:
-			print(elt)
 			logref.write(str(elt)+"\n")
 	logref.close()
 		
