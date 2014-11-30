@@ -146,7 +146,7 @@ def initialize_hanabi():  ##Separated so that we can test things more easily on 
 
 	bot = DeductionBot(variant)
 	player_name_list = []
-	SIM_DEPTH = 0
+	SIM_DEPTH = 4
 	game = HanabiGame("The Overworld",variant,[],bot,SIM_DEPTH,0)
 	game.set_game_deck()
 	game.set_stacks()
@@ -169,8 +169,14 @@ def initialize_hanabi():  ##Separated so that we can test things more easily on 
 		games[i+1].set_game_log()	
 		
 	for x in games:
+		try:
+			a.set_nextgame(x)
+			a.set_nextplayers(x)
+		except:
+			print("Didn't work this time, but should the next times")
 		x.set_conventions(HanabiConventions(x))
-	
+		a=x
+		
 	#for testing...
 	print("[Game, player list, deck size]:")
 	for x in games:

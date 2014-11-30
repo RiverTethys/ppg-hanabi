@@ -177,6 +177,7 @@ class Player(object):
 		self.fref = ".\\{}.hanabidata".format(name)
 		self.depth = 0
 		self.trike = []
+		self.nextplayer = []
 	
 	def __repr__(self):
 		return self.name
@@ -194,6 +195,9 @@ class Player(object):
 					dude.trike.tab.new_location(card,self.name,game)
 				else:
 					dude.trike.tab.new_visible(card,self.name,game)
+	
+	def set_nextplayer(self,nextplayer):
+		self.nextplayer = nextplayer
 	
 	def tst_decision(self,game,tstq):
 		# dont ask for input because the
@@ -382,7 +386,7 @@ def ikyk(game,playername,other):
 	return temptab
 
 def eval_flow(player,game):
-	if game.depth == 0:
+	if game.depth == game.total_depth:
 		eval_flow_base_case(player,game)
 	else:
 		pass
@@ -394,10 +398,10 @@ def simulate(player,game,EventList):
 	event = player.decision(game)
 	game.action(event)
 	EventList.append(event)
-	if game.depth == game.total_depth
+	if game.depth == game.total_depth:
 		return
 	else:
-		simulate(player,player.trike.game,EventList)
+		simulate(player.nextplayer,game.nextgame,EventList)
 
 	
 		
@@ -569,6 +573,7 @@ class HanabiGame(object):
 		self.initial_game_deck = {}
 		self.decks = {}
 		self.depth = depth
+		self.nextgame = []
 	
 	def __repr__(self):
 		return self.name
@@ -612,6 +617,16 @@ class HanabiGame(object):
 		#initialize Future Log
 		self.future_log = deque([HanabiEvent(None,None,None,None,None,None,None) for x in range(MAX_TURNS)])
 		self.past_log = []
+	
+	def set_nextgame(self,nextgame):
+		self.nextgame = nextgame
+	
+	def set_nextplayers(self,nextgame):
+		for seat, dude in enumerate(self.players):
+			if seat == len(self.players)-1:
+				dude.set_nextplayer(self.nextgame.players[0])
+			else:
+				dude.set_nextplayer(self.nextgame.players[seat+1])
 	
 	def set_conventions(self,conventions):
 		self.con = conventions
