@@ -479,23 +479,32 @@ def eval_flow(player,game):
 		for choice in chs:
 			event = event_from_choice(choice,player,game)
 			EventList = [event]
+			condition = save_condition(player,game)
 			simulate(player,game,event,EventList) #this will predict the events following a given choice
 			evaluate_choices(player,game,choice,EventList) #this will bump the choice
+			reset_button(player,game,condition)
 		chs.sort()
 		#for x in chs:
 			#print(x)
 		return chs
 
+def save_condition(player,game):
+	pass
+	
+def reset_button(player,game,condition):
+	pass
+		
 def simulate(player,game,event,EventList):
 	for p in game.players:
 		p.trike.update_table(game)
+	
 	game.action(event)
 	
 	event = player.nextplayer.decision(game.nextgame)
 	
 	EventList.append(event)
 	if player.nextplayer.nextplayer:
-		simulate(player.nextplayer,game.nextgame,EventList)
+		simulate(player.nextplayer,game.nextgame,event,EventList)
 		return
 	else:
 		return
@@ -1034,6 +1043,8 @@ class BitTable(object):
 			self.name = pl
 		else:
 			self.name = "None"
+		#print (game)
+		#print (game.card_list.deck)
 		self.list = {card: BitFolder(game,card) for card in game.card_list.deck}
 		self.current_list = self.list
 		
