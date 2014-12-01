@@ -111,10 +111,10 @@ def turn(games):
 	active_player = games[0].players[0]
 	print("{}'s turn:\n".format(active_player.name))
 	dec = active_player.decision(games[0])
-	for each_game in games:
-		print(dec)
-		print(dec.id)
-		each_game.action(dec)
+
+	print(dec)
+	print(dec.id)
+	games[0].action(dec)
 	
 	if (len(games[0].decks["game_deck"]) == 0 ):
 		games[0].inc_fc()
