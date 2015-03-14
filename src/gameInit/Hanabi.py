@@ -50,7 +50,7 @@
 
 from copy import deepcopy
 
-from src.HanabiConventionFlows import HanabiConventions
+from src.gamePlayers.HanabiConventionFlows import HanabiConventions
 from src.HanabiDeductionFlows import DeductionBot
 from src.gameComponents.HanabiDeckTemplate import HanabiDeckTemplate
 from src.gameComponents.HanabiGame import HanabiGame
