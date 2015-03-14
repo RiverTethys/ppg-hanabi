@@ -13,7 +13,7 @@
 
 
 #####    TO DO LIST    #####
-#suggestion: add even to do things up here, and then migrate them down once the other person has seen them
+# suggestion: add even to do things up here, and then migrate them down once the other person has seen them
 
 # we should check if it's okay to dump the Sim files
 
@@ -27,30 +27,35 @@
 ## THIS IS TERRIBLE, but I would like to maybe restructure two things in a big way: give bit-folder .id tags, and find them that way instead of storing them as values to a card key.
 ## The other thing would be similar, but possibly much lower priority: stop storing decks by name and also just store them in a list,  and maybe write a few functions to get rid of all this .decks[deck_name].deck nonsense.
 
-#probably convenient to have a "possible values" function in bit...Folder, I think, that eliminates the already-confirmed-negative values from a list of values (for a given quality)
-#.... that way we won't see the "you already tried to say that this thing had negative spin" message a bajillion times.
+# probably convenient to have a "possible values" function in bit...Folder, I think, that eliminates the already-confirmed-negative values from a list of values (for a given quality)
+# .... that way we won't see the "you already tried to say that this thing had negative spin" message a bajillion times.
 
-#A. Functioning AI
-#1. Make-lists function for the table (CHECK?)
-#2. Edit color and number deductions (CHECK?)
-#3. Convention flows for play
-#4. Convention flows for discard
-#5. Flows for cluing
-#6. Main Flow
+# A. Functioning AI
+# 1. Make-lists function for the table (CHECK?)
+# 2. Edit color and number deductions (CHECK?)
+# 3. Convention flows for play
+# 4. Convention flows for discard
+# 5. Flows for cluing
+# 6. Main Flow
 
-#B. Implementation
-#1. Initialization (sim games) (CHECK?)
-#1.b. having some number of NPCs as well as players (CHECK?)
-#2. Feeding info from game to Sim (probably just an Event) (We have the action() part of this, we just need update_table part of this)
-#2.a. build an association between a real player and the corresponding sim players (CHECK?)
-#3. Make this happen erry turn (information goes in and all of the proper updates happen in the sim, and all of the updates in the sim) (again, done except maybe the AI parts)
-#3.b. AI turn vs. Person Turn (this probably happens as we work on the rest of A)
+# B. Implementation
+# 1. Initialization (sim games) (CHECK?)
+# 1.b. having some number of NPCs as well as players (CHECK?)
+# 2. Feeding info from game to Sim (probably just an Event) (We have the action() part of this, we just need update_table part of this)
+# 2.a. build an association between a real player and the corresponding sim players (CHECK?)
+# 3. Make this happen erry turn (information goes in and all of the proper updates happen in the sim, and all of the updates in the sim) (again, done except maybe the AI parts)
+# 3.b. AI turn vs. Person Turn (this probably happens as we work on the rest of A)
 
-#Not 100% sure if Events are going to be used for AI planning, but if they are, we may need some way to track 'intent' (e.g. protective clues, versus playing clues). Right now I'm attempting to use them (that is, the list of possible actions is actually a list of events)
+# Not 100% sure if Events are going to be used for AI planning, but if they are, we may need some way to track 'intent' (e.g. protective clues, versus playing clues). Right now I'm attempting to use them (that is, the list of possible actions is actually a list of events)
 
-from HanabiConventionFlows import *
-from HanabiDeductionFlows import *
-from HanabiClasses import *
+from copy import deepcopy
+
+from src.HanabiConventionFlows import HanabiConventions
+from src.HanabiDeductionFlows import DeductionBot
+from src.gameComponents.HanabiDeckTemplate import HanabiDeckTemplate
+from src.gameComponents.HanabiGame import HanabiGame
+from src.gameComponents.HanabiSim import HanabiSim
+from src.gameComponents.HanabiVariant import HanabiVariant
 
 
 def sims_consistent(games):
@@ -58,7 +63,7 @@ def sims_consistent(games):
 		for y in games[0].decks:
 			if x.decks[y].deck != games[0].decks[y].deck:
 				return False
-		for a,b in zip(x.players,games[0].players):
+		for a, b in zip(x.players, games[0].players):
 			if a.name != b.name:
 				return False
 		if x.clocks != games[0].clocks or x.bombs != games[0].bombs:
@@ -66,43 +71,43 @@ def sims_consistent(games):
 	return True
 
 
-
-
 def update_tables(games):
 	for x in games:
 		for p in x.players:
 			p.trike.update_table(x)
 
-def print_table_location_list(games,game_name,player_name,location_name):
+
+def print_table_location_list(games, game_name, player_name, location_name):
 	for x in games:
 		if game_name == x.name:
 			for p in x.players:
 				if player_name == p.name:
 					location_dict = p.trike.tab.location[location_name]
 					for card in location_dict:
-						if len(location_dict[card].pile) >0:
-							print ( str(card)+": "+str(location_dict[card]))
+						if len(location_dict[card].pile) > 0:
+							print(str(card) + ": " + str(location_dict[card]))
 					print("\n")
-						
+
+
 def print_locations(games):
 	update_tables(games)
 	for x in games:
-		print("\n\n**********"+x.name + "**********:\n")
+		print("\n\n**********" + x.name + "**********:\n")
 		for p in x.players:
-			print("\n---"+p.name+"---:\n")
-			print("Play Queue: "+str(p.trike.tab.play_q)+"\nDiscard Queue: "+str(p.trike.tab.discard_q)+"\n")
+			print("\n---" + p.name + "---:\n")
+			print("Play Queue: " + str(p.trike.tab.play_q) + "\nDiscard Queue: " + str(p.trike.tab.discard_q) + "\n")
 			for l in x.decks:
-				print(l+":\n")
-				print_table_location_list(games,x.name,p.name,l)
+				print(l + ":\n")
+				print_table_location_list(games, x.name, p.name, l)
 		print("\n")
-				
-					
-def print_table_list(games,game_name,player_name,type,quality,value,spin):
+
+
+def print_table_list(games, game_name, player_name, type, quality, value, spin):
 	for x in games:
 		if game_name == x.name:
 			for p in x.players:
 				if player_name == p.name:
-					print (p.trike.tab.make_short_list(type,quality,value,spin))
+					print(p.trike.tab.make_short_list(type, quality, value, spin))
 
 
 def turn(games):
@@ -115,59 +120,63 @@ def turn(games):
 	print(dec)
 	print(dec.id)
 	games[0].action(dec)
-	
+
 	if (len(games[0].decks["game_deck"]) == 0 ):
 		games[0].inc_fc()
 	if (games[0].final_countdown > len(games[0].players)):
 		games[0].victory = True
-	for x in games:	
+	for x in games:
 		x.new_first_player()
 	if sims_consistent(games):
 		consistent = "\nThe sim games are consistent with the real game.\n"
 	else:
 		consistent = "\nUh oh.\nThe sim games are NOT consistent with the real game.\n"
 	print(consistent)
-	# Update sim games with new change in the real game					
+
+
+# Update sim games with new change in the real game
 
 def write_data(games):
-	for x in games:	
-			x.write_all_states()
-	
-def initialize_hanabi():  ##Separated so that we can test things more easily on the command line
-	#CARD_COLORS = ['R','Y','G','B','W','H']
-	CARD_COLORS = ['R','Y','G','B','W']
-	CARD_NUMBERS = [1,2,3,4,5]
-	#deck_template = HanabiDeckTemplate(CARD_COLORS,CARD_NUMBERS,{x:{1:3,2:2,3:2,4:2,5:1} for x in ('R','Y','G','B','W','H')})
-	distr = {x:{1:3,2:2,3:2,4:2,5:1} for x in ('R','Y','G','B','W')}
-	deck_template = HanabiDeckTemplate(CARD_COLORS,CARD_NUMBERS,distr)
-	
-	##(playernum,handsize,deck_template,[])
-	variant = HanabiVariant(4,4,deck_template,[])
+	for x in games:
+		x.write_all_states()
+
+
+def initialize_hanabi():  # Separated so that we can test things more easily on the command line
+	# CARD_COLORS = ['R','Y','G','B','W','H']
+	CARD_COLORS = ['R', 'Y', 'G', 'B', 'W']
+	CARD_NUMBERS = [1, 2, 3, 4, 5]
+	# deck_template =
+	# HanabiDeckTemplate(CARD_COLORS,CARD_NUMBERS,{x:{1:3,2:2,3:2,4:2,5:1} for x in ('R','Y','G','B','W','H')})
+	distr = {x: {1: 3, 2: 2, 3: 2, 4: 2, 5: 1} for x in ('R', 'Y', 'G', 'B', 'W')}
+	deck_template = HanabiDeckTemplate(CARD_COLORS, CARD_NUMBERS, distr)
+
+	# (playernum,handsize,deck_template,[])
+	variant = HanabiVariant(4, 4, deck_template, [])
 
 	bot = DeductionBot(variant)
 	player_name_list = []
 	SIM_DEPTH = 4
-	game = HanabiGame("The Overworld",variant,[],bot,SIM_DEPTH,0)
+	game = HanabiGame("The Overworld", variant, [], bot, SIM_DEPTH, 0)
 	game.set_game_deck()
 	game.set_stacks()
 	game.initial_player_order(player_name_list)
 	game.update_all_tables()
 	game.initial_hands()
 	game.set_game_log()
-		
-	sim_name_list= []
+
+	sim_name_list = []
 	for dude in game.players_initial:
 		sim_name_list.append(dude.name)
 	games = [game]
 	for i in range(SIM_DEPTH):
-		games.append(HanabiSim("sim" + str(i+1), game, i + 1))
-		games[i+1].set_game_deck()
-		games[i+1].set_stacks()
-		games[i+1].initial_player_order(sim_name_list)
-		games[i+1].update_all_tables()
-		games[i+1].initial_hands()
-		games[i+1].set_game_log()	
-		
+		games.append(HanabiSim("sim" + str(i + 1), game, i + 1))
+		games[i + 1].set_game_deck()
+		games[i + 1].set_stacks()
+		games[i + 1].initial_player_order(sim_name_list)
+		games[i + 1].update_all_tables()
+		games[i + 1].initial_hands()
+		games[i + 1].set_game_log()
+
 	for x in games:
 		try:
 			a.set_nextgame(x)
@@ -175,20 +184,19 @@ def initialize_hanabi():  ##Separated so that we can test things more easily on 
 		except:
 			print("Didn't work this time, but should the next times")
 		x.set_conventions(HanabiConventions(x))
-		a=x
-		
+		a = x
+
 	#for testing...
 	print("[Game, player list, deck size]:")
 	for x in games:
-		print(str([x,[y for y in x.players], len(x.decks["game_deck"] )]))
-	
-	
+		print(str([x, [y for y in x.players], len(x.decks["game_deck"])]))
+
 	starting_deck = deepcopy(games[0].decks["game_deck"].deck)
-	i=0
+	i = 0
 	for card in starting_deck:
-		print("{}. {}".format(i,card))
+		print("{}. {}".format(i, card))
 		i += 1
-	
+
 	games[0].write_all_states()
 	if sims_consistent(games):
 		consistent = "\nThe sim games are consistent with the real game.\n"
@@ -196,23 +204,23 @@ def initialize_hanabi():  ##Separated so that we can test things more easily on 
 		consistent = "\nUh oh.\nThe sim games are NOT consistent with the real game.\n"
 	print(consistent)
 	return games
-	
+
+
 def play_hanabi():
-		
 	games = initialize_hanabi()
 	game = games[0]
-	
-	while(not (game.defeat or game.victory)):
+
+	while (not (game.defeat or game.victory)):
 		#try:
 		turn(games)
 		write_data(games)
-		#except:
-		#	logref = open("HanabiLog.hanabilog","w")
-		#	for elt in game.past_log:
-		#		logref.write(str(elt)+"\n")
-		#	logref.close()
-		#	break
-	
+	#except:
+	#	logref = open("HanabiLog.hanabilog","w")
+	#	for elt in game.past_log:
+	#		logref.write(str(elt)+"\n")
+	#	logref.close()
+	#	break
+
 	if game.defeat:
 		print("YOU'VE FAILED!")
 	elif game.victory:
@@ -221,28 +229,27 @@ def play_hanabi():
 		print("**************************************************************\n")
 	else:
 		print("Whoa whoa WHOA. You should NOT be seeing this!")
-	
 
 	for elt in game.past_log:
 		print(elt)
-	logref = open("HanabiLog.hanabilog","w")
+	logref = open("HanabiLog.hanabilog", "w")
 	response = input("\nSave this game's deck and log? (y/n) ")
 	if response.upper() == "Y":
-		newscript = open("newscript.hanabiscript","w")
-		newdeck = open("newdeck.hanabideck","w")
-		#build references to players 
+		newscript = open("newscript.hanabiscript", "w")
+		newdeck = open("newdeck.hanabideck", "w")
+		# build references to players
 		name_list = []
 		for p in game.players_initial:
 			name_list.append(p.name)
-		#build script and deck files
+		# build script and deck files
 		for elt in game.past_log:
-			logref.write(str(elt)+"\n")
+			logref.write(str(elt) + "\n")
 			newscript.write("{}{}{}{}{}\n".format(elt.type[:1].lower()
-			                                     ,elt.pos if elt.pos else 0
-												 ,name_list.index(elt.tgt) if elt.tgt else 0
-												 ,elt.color.lower() if elt.color else "x"
-												 ,elt.number if elt.number else 0
-												 ))
+				, elt.pos if elt.pos else 0
+				, name_list.index(elt.tgt) if elt.tgt else 0
+				, elt.color.lower() if elt.color else "x"
+				, elt.number if elt.number else 0
+			))
 		newscript.close()
 		for card in game.initial_game_deck.deck:
 			newdeck.write("{}\n".format(card))
@@ -250,10 +257,11 @@ def play_hanabi():
 		print("Remember to rename the new deck file if you want to keep it.")
 	else:
 		for elt in game.past_log:
-			logref.write(str(elt)+"\n")
+			logref.write(str(elt) + "\n")
 	logref.close()
-		
-if __name__ == "__main__":		
+
+
+if __name__ == "__main__":
 	play_hanabi()
 
 
